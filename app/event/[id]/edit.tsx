@@ -13,11 +13,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Calendar, Clock, MapPin, Image as ImageIcon, IdCard, Volume2, Vibrate, Ticket } from 'lucide-react-native';
+import { Calendar, Clock, MapPin, IdCard, Volume2, Vibrate, Ticket } from 'lucide-react-native';
 import { useEvents } from '@/contexts/EventContext';
 import { SUCCESS_SOUNDS, ERROR_SOUNDS } from '@/contexts/SettingsContext';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import * as Haptics from 'expo-haptics';
+import ImagePicker from '@/components/ImagePicker';
 
 const isWeb = Platform.OS === 'web';
 
@@ -318,62 +319,38 @@ export default function EditEventScreen() {
               </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>URL de Imagen o Video del Evento</Text>
-              <View style={styles.iconInputContainer}>
-                <ImageIcon color="#6366f1" size={20} />
-                <TextInput
-                  style={styles.iconInput}
-                  value={imageUrl}
-                  onChangeText={setImageUrl}
-                  placeholder="https://ejemplo.com/imagen.jpg"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="url"
-                  autoCapitalize="none"
-                />
-              </View>
-              <Text style={styles.helperText}>
-                Puedes usar una imagen o un video de YouTube/Vimeo. Si no proporcionas una URL, se usará una imagen por defecto
-              </Text>
-            </View>
+            <ImagePicker
+              label="Imagen o Video del Evento"
+              helperText="Sube una imagen para el evento. Se optimizará automáticamente para mejor rendimiento."
+              value={imageUrl}
+              onChange={setImageUrl}
+              aspectRatio={[16, 9]}
+              quality={0.8}
+              maxWidth={1920}
+              maxHeight={1080}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Logo de la Empresa Organizadora</Text>
-              <View style={styles.iconInputContainer}>
-                <ImageIcon color="#6366f1" size={20} />
-                <TextInput
-                  style={styles.iconInput}
-                  value={organizerLogoUrl}
-                  onChangeText={setOrganizerLogoUrl}
-                  placeholder="https://ejemplo.com/logo.png"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="url"
-                  autoCapitalize="none"
-                />
-              </View>
-              <Text style={styles.helperText}>
-                Este logo aparecerá en tickets, códigos QR y reportes
-              </Text>
-            </View>
+            <ImagePicker
+              label="Logo de la Empresa Organizadora"
+              helperText="Este logo aparecerá en tickets, códigos QR y reportes"
+              value={organizerLogoUrl}
+              onChange={setOrganizerLogoUrl}
+              aspectRatio={[1, 1]}
+              quality={0.9}
+              maxWidth={512}
+              maxHeight={512}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Plano del Evento</Text>
-              <View style={styles.iconInputContainer}>
-                <ImageIcon color="#6366f1" size={20} />
-                <TextInput
-                  style={styles.iconInput}
-                  value={venuePlanUrl}
-                  onChangeText={setVenuePlanUrl}
-                  placeholder="https://ejemplo.com/plano.png"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="url"
-                  autoCapitalize="none"
-                />
-              </View>
-              <Text style={styles.helperText}>
-                Sube una imagen del plano del salón o venue del evento
-              </Text>
-            </View>
+            <ImagePicker
+              label="Plano del Evento"
+              helperText="Sube una imagen del plano del salón o venue del evento"
+              value={venuePlanUrl}
+              onChange={setVenuePlanUrl}
+              aspectRatio={[4, 3]}
+              quality={0.85}
+              maxWidth={1920}
+              maxHeight={1440}
+            />
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Nombre del Campo de Identificación</Text>
