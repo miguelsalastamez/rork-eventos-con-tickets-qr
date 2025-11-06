@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Building2, Users, TrendingUp, DollarSign, Package } from 'lucide-react-native';
+import { Building2, Users, TrendingUp, DollarSign, Package, UserCheck } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '@/contexts/UserContext';
 import { useEvents } from '@/contexts/EventContext';
@@ -125,6 +125,14 @@ export default function AdminDashboardScreen() {
             >
               <Package color="#6366f1" size={20} />
               <Text style={styles.actionButtonText}>Ver Todos los Eventos</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push('/admin/test-users' as any)}
+            >
+              <UserCheck color="#10b981" size={20} />
+              <Text style={styles.actionButtonText}>Usuarios de Prueba</Text>
             </TouchableOpacity>
           </View>
         </View>
