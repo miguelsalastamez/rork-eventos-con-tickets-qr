@@ -13,8 +13,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Calendar, Clock, MapPin, IdCard, Volume2, Vibrate, Ticket } from 'lucide-react-native';
+import { Calendar, Clock, MapPin, IdCard, Volume2, Vibrate, Ticket, AlertTriangle } from 'lucide-react-native';
 import { useEvents } from '@/contexts/EventContext';
+import { useUser } from '@/contexts/UserContext';
+import { canEditEvent } from '@/lib/permissions';
 import { SUCCESS_SOUNDS, ERROR_SOUNDS } from '@/contexts/SettingsContext';
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import * as Haptics from 'expo-haptics';
@@ -26,8 +28,10 @@ export default function EditEventScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { updateEvent, getEventById } = useEvents();
+  const { user } = useUser();
 
   const event = getEventById(id);
+  const userCanEdit = event ? canEditEvent(event, user) : false;
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -77,6 +81,24 @@ export default function EditEventScreen() {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Evento no encontrado</Text>
+      </View>
+    );
+  }
+
+  if (!userCanEdit) {
+    return (
+      <View style={styles.errorContainer}>
+        <AlertTriangle color="#ef4444" size={48} />
+        <Text style={styles.errorTitle}>Acceso Denegado</Text>
+        <Text style={styles.errorText}>
+          No tienes permisos para editar este evento.
+        </Text>
+        <TouchableOpacity 
+          style={styles.errorButton} 
+          onPress={() => router.back()}
+        >
+          <Text style={styles.errorButtonText}>Volver</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -557,10 +579,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#f9fafb',
+    padding: 20,
+    gap: 16,
+  },
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: '600' as const,
+    color: '#111827',
+    marginTop: 12,
   },
   errorText: {
     fontSize: 16,
     color: '#6b7280',
+    textAlign: 'center' as const,
+  },
+  errorButton: {
+    marginTop: 20,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    backgroundColor: '#6366f1',
+    borderRadius: 10,
+  },
+  errorButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#fff',
   },
   keyboardView: {
     flex: 1,

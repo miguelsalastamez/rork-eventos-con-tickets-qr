@@ -13,10 +13,11 @@ import {
 
 import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import type { Ticket } from '@/types';
-import { Calendar, MapPin, Users, UserPlus, QrCode, Trash2, Edit3, Settings, Gift, MessageSquare, Trophy, Map as MapIcon, X, Ticket as TicketIcon, Minus, Plus } from 'lucide-react-native';
+import { Calendar, MapPin, Users, UserPlus, QrCode, Trash2, Edit3, Settings, Gift, MessageSquare, Trophy, Map as MapIcon, X, Ticket as TicketIcon, Minus, Plus, AlertCircle } from 'lucide-react-native';
 import { useEvents } from '@/contexts/EventContext';
 import { useTickets } from '@/contexts/TicketContext';
 import { useUser } from '@/contexts/UserContext';
+import { canEditEvent, canDeleteEvent, canManageEventSettings, canManageAttendees, canManagePrizesAndRaffle, canSendMessages, canManageEventTickets, getUserRoleLabel } from '@/lib/permissions';
 import { LinearGradient } from 'expo-linear-gradient';
 import MediaViewer from '@/components/MediaViewer';
 
@@ -102,12 +103,20 @@ export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { events, attendees: allAttendees, deleteEvent, getEventRaffleWinners } = useEvents();
   const { getAvailableEventTickets } = useTickets();
-  const { subscriptionTier, canAccessFeature } = useUser();
+  const { user, subscriptionTier, canAccessFeature } = useUser();
   const [venuePlanModalVisible, setVenuePlanModalVisible] = useState(false);
 
   const hasTicketsAccess = canAccessFeature('hasEmailSupport');
 
   const event = useMemo(() => events.find((e) => e.id === id), [events, id]);
+  
+  const userCanEdit = useMemo(() => event ? canEditEvent(event, user) : false, [event, user]);
+  const userCanDelete = useMemo(() => event ? canDeleteEvent(event, user) : false, [event, user]);
+  const userCanManageSettings = useMemo(() => event ? canManageEventSettings(event, user) : false, [event, user]);
+  const userCanManageAttendees = useMemo(() => event ? canManageAttendees(event, user) : false, [event, user]);
+  const userCanManageActivities = useMemo(() => event ? canManagePrizesAndRaffle(event, user) : false, [event, user]);
+  const userCanSendMessages = useMemo(() => event ? canSendMessages(event, user) : false, [event, user]);
+  const userCanManageTickets = useMemo(() => event ? canManageEventTickets(event, user) : false, [event, user]);
   const attendees = useMemo(() => allAttendees.filter((a) => a.eventId === id), [allAttendees, id]);
   const checkedInCount = attendees.filter(a => a.checkedIn).length;
   const raffleWinners = useMemo(() => getEventRaffleWinners(id), [getEventRaffleWinners, id]);
@@ -156,6 +165,18 @@ export default function EventDetailScreen() {
             style={styles.imageGradient}
           />
         </View>
+
+        {!userCanEdit && (
+          <View style={styles.permissionBanner}>
+            <AlertCircle color="#f59e0b" size={20} />
+            <View style={styles.permissionBannerContent}>
+              <Text style={styles.permissionBannerTitle}>Vista de solo lectura</Text>
+              <Text style={styles.permissionBannerText}>
+                Tu rol actual es: {user ? getUserRoleLabel(user.role) : 'Invitado'}. Solo puedes ver la información del evento.
+              </Text>
+            </View>
+          </View>
+        )}
 
         {availableTickets.length > 0 && hasTicketsAccess && (
           <View style={styles.ticketsSection}>
@@ -293,80 +314,88 @@ export default function EventDetailScreen() {
 
 
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Configuración</Text>
-            
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push(`/event/${id}/settings` as any)}
-            >
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
-                <Settings color={primaryColor} size={22} />
-              </View>
-              <View style={styles.actionButtonContent}>
-                <Text style={styles.actionButtonTitle}>Configuración del Evento</Text>
-                <Text style={styles.actionButtonSubtitle}>
-                  Colores, sonidos, campos y más
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+          {userCanManageSettings && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Configuración</Text>
+              
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push(`/event/${id}/settings` as any)}
+              >
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
+                  <Settings color={primaryColor} size={22} />
+                </View>
+                <View style={styles.actionButtonContent}>
+                  <Text style={styles.actionButtonTitle}>Configuración del Evento</Text>
+                  <Text style={styles.actionButtonSubtitle}>
+                    Colores, sonidos, campos y más
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Comunicación</Text>
-            
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push(`/event/${id}/messaging` as any)}
-            >
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
-                <MessageSquare color={primaryColor} size={22} />
-              </View>
-              <View style={styles.actionButtonContent}>
-                <Text style={styles.actionButtonTitle}>Difusión del Evento</Text>
-                <Text style={styles.actionButtonSubtitle}>
-                  Envía mensajes por email y WhatsApp
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+          {userCanSendMessages && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Comunicación</Text>
+              
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push(`/event/${id}/messaging` as any)}
+              >
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
+                  <MessageSquare color={primaryColor} size={22} />
+                </View>
+                <View style={styles.actionButtonContent}>
+                  <Text style={styles.actionButtonTitle}>Difusión del Evento</Text>
+                  <Text style={styles.actionButtonSubtitle}>
+                    Envía mensajes por email y WhatsApp
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Actividades</Text>
-            
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push(`/event/${id}/activities` as any)}
-            >
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
-                <Gift color={primaryColor} size={22} />
-              </View>
-              <View style={styles.actionButtonContent}>
-                <Text style={styles.actionButtonTitle}>Actividades para Invitados</Text>
-                <Text style={styles.actionButtonSubtitle}>
-                  Sorteos, dinámicas y más
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+          {userCanManageActivities && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Actividades</Text>
+              
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push(`/event/${id}/activities` as any)}
+              >
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
+                  <Gift color={primaryColor} size={22} />
+                </View>
+                <View style={styles.actionButtonContent}>
+                  <Text style={styles.actionButtonTitle}>Actividades para Invitados</Text>
+                  <Text style={styles.actionButtonSubtitle}>
+                    Sorteos, dinámicas y más
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Gestión de Invitados</Text>
             
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push(`/event/${id}/add-attendees` as any)}
-            >
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
-                <UserPlus color={primaryColor} size={22} />
-              </View>
-              <View style={styles.actionButtonContent}>
-                <Text style={styles.actionButtonTitle}>Agregar Invitados</Text>
-                <Text style={styles.actionButtonSubtitle}>
-                  Registra personas manualmente o por lote
-                </Text>
-              </View>
-            </TouchableOpacity>
+            {userCanManageAttendees && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push(`/event/${id}/add-attendees` as any)}
+              >
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
+                  <UserPlus color={primaryColor} size={22} />
+                </View>
+                <View style={styles.actionButtonContent}>
+                  <Text style={styles.actionButtonTitle}>Agregar Invitados</Text>
+                  <Text style={styles.actionButtonSubtitle}>
+                    Registra personas manualmente o por lote
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity
               style={styles.actionButton}
@@ -383,34 +412,40 @@ export default function EventDetailScreen() {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => router.push('/scan-qr' as any)}
-            >
-              <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
-                <QrCode color={primaryColor} size={22} />
-              </View>
-              <View style={styles.actionButtonContent}>
-                <Text style={styles.actionButtonTitle}>Escanear QR</Text>
-                <Text style={styles.actionButtonSubtitle}>
-                  Valida el acceso de invitados
-                </Text>
-              </View>
-            </TouchableOpacity>
+            {userCanManageAttendees && (
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push('/scan-qr' as any)}
+              >
+                <View style={[styles.actionButtonIcon, { backgroundColor: `${primaryColor}15` }]}>
+                  <QrCode color={primaryColor} size={22} />
+                </View>
+                <View style={styles.actionButtonContent}>
+                  <Text style={styles.actionButtonTitle}>Escanear QR</Text>
+                  <Text style={styles.actionButtonSubtitle}>
+                    Valida el acceso de invitados
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            )}
           </View>
 
-          <TouchableOpacity
-            style={[styles.editButton, { backgroundColor: primaryColor }]}
-            onPress={() => router.push(`/event/${id}/edit` as any)}
-          >
-            <Edit3 color="#fff" size={20} />
-            <Text style={styles.editButtonText}>Editar Evento</Text>
-          </TouchableOpacity>
+          {userCanEdit && (
+            <TouchableOpacity
+              style={[styles.editButton, { backgroundColor: primaryColor }]}
+              onPress={() => router.push(`/event/${id}/edit` as any)}
+            >
+              <Edit3 color="#fff" size={20} />
+              <Text style={styles.editButtonText}>Editar Evento</Text>
+            </TouchableOpacity>
+          )}
 
-          <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
-            <Trash2 color="#ef4444" size={20} />
-            <Text style={styles.deleteButtonText}>Eliminar Evento</Text>
-          </TouchableOpacity>
+          {userCanDelete && (
+            <TouchableOpacity style={styles.deleteButton} onPress={handleDelete}>
+              <Trash2 color="#ef4444" size={20} />
+              <Text style={styles.deleteButtonText}>Eliminar Evento</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </ScrollView>
 
@@ -777,5 +812,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  permissionBanner: {
+    backgroundColor: '#fef3c7',
+    borderLeftWidth: 4,
+    borderLeftColor: '#f59e0b',
+    padding: 16,
+    flexDirection: 'row',
+    gap: 12,
+    marginHorizontal: 20,
+    marginTop: 16,
+    borderRadius: 8,
+  },
+  permissionBannerContent: {
+    flex: 1,
+    gap: 4,
+  },
+  permissionBannerTitle: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: '#92400e',
+  },
+  permissionBannerText: {
+    fontSize: 13,
+    color: '#78350f',
+    lineHeight: 18,
   },
 });
