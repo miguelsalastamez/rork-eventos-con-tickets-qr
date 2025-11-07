@@ -97,3 +97,27 @@ export function canUserDeleteEvent(userId: string, eventCreatorId: string, userR
   
   return userId === eventCreatorId;
 }
+
+export function canViewEvent(user: { id: string; role: UserRole; organizationId?: string }, event: { createdBy: string; organizationId?: string | null }): boolean {
+  if (user.role === 'super_admin') {
+    return true;
+  }
+  
+  if (user.organizationId && event.organizationId === user.organizationId) {
+    return true;
+  }
+  
+  return event.createdBy === user.id;
+}
+
+export function canEditEvent(user: { id: string; role: UserRole; organizationId?: string }, event: { createdBy: string; organizationId?: string | null }): boolean {
+  if (user.role === 'super_admin' || user.role === 'seller_admin') {
+    return true;
+  }
+  
+  if (user.role === 'collaborator' && user.organizationId && event.organizationId === user.organizationId) {
+    return true;
+  }
+  
+  return event.createdBy === user.id;
+}
