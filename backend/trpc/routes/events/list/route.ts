@@ -1,69 +1,32 @@
-import { protectedProcedure } from "@/backend/trpc/create-context";
+import { z } from 'zod';
+import { protectedProcedure } from '../../../create-context';
+import { prisma } from '../../../../lib/prisma';
 
-export const listEventsRoute = protectedProcedure.query(async ({ ctx }) => {
-  const { user, prisma } = ctx;
+export const listEventsRoute = protectedProcedure
+  .input(
+    z
+      .object({
+        organizationId: z.string().optional(),
+        userId: z.string().optional(),
+      })
+      .optional()
+  )
+  .query(async ({ ctx, input }) => {
+    const where: any = {};
 
-  let events;
-  
-  if (user.role === 'super_admin') {
-    events = await prisma.event.findMany({
-      include: {
-        creator: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
-        organization: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            attendees: true,
-          },
-        },
-      },
+    if (ctx.user.role === 'super_admin') {
+    } else if (input?.organizationId) {
+      where.organizationId = input.organizationId;
+    } else if (input?.userId) {
+      where.createdBy = input.userId;
+    } else {
+      where.createdBy = ctx.user.id;
+    }
+
+    const events = await prisma.event.findMany({
+      where,
       orderBy: {
-        createdAt: 'desc',
-      },
-    });
-  } else if (user.organizationId) {
-    events = await prisma.event.findMany({
-      where: {
-        organizationId: user.organizationId,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
-        organization: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            attendees: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-  } else {
-    events = await prisma.event.findMany({
-      where: {
-        createdBy: user.id,
+        date: 'desc',
       },
       include: {
         creator: {
@@ -73,30 +36,9 @@ export const listEventsRoute = protectedProcedure.query(async ({ ctx }) => {
             email: true,
           },
         },
-        organization: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        _count: {
-          select: {
-            attendees: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
+        organization: true,
       },
     });
-  }
 
-  return events.map((event: any) => ({
-    ...event,
-    date: event.date.toISOString(),
-    createdAt: event.createdAt.toISOString(),
-    updatedAt: event.updatedAt.toISOString(),
-  }));
-});
-
-export default listEventsRoute;
+    return events;
+  });

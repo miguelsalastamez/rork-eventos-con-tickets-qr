@@ -1,5 +1,6 @@
-import { protectedProcedure } from "@/backend/trpc/create-context";
-import { z } from "zod";
+import { z } from 'zod';
+import { protectedProcedure } from '../../../create-context';
+import { prisma } from '../../../../lib/prisma';
 
 export const createEventRoute = protectedProcedure
   .input(
@@ -21,41 +22,17 @@ export const createEventRoute = protectedProcedure
       primaryColor: z.string().optional(),
       secondaryColor: z.string().optional(),
       accentColor: z.string().optional(),
+      organizationId: z.string().optional(),
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const { user, prisma } = ctx;
-
     const event = await prisma.event.create({
       data: {
         ...input,
         date: new Date(input.date),
-        createdBy: user.id,
-        organizationId: user.organizationId || null,
-      },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
-        organization: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
+        createdBy: ctx.user.id,
       },
     });
 
-    return {
-      ...event,
-      date: event.date.toISOString(),
-      createdAt: event.createdAt.toISOString(),
-      updatedAt: event.updatedAt.toISOString(),
-    };
+    return event;
   });
-
-export default createEventRoute;

@@ -1,7 +1,7 @@
-import { protectedProcedure } from "@/backend/trpc/create-context";
-import { canEditEvent } from "@/backend/lib/permissions";
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
+import { z } from 'zod';
+import { protectedProcedure } from '../../../create-context';
+import { prisma } from '../../../../lib/prisma';
+import { canUserEditEvent } from '../../../../lib/permissions';
 
 export const updateEventRoute = protectedProcedure
   .input(
@@ -27,56 +27,26 @@ export const updateEventRoute = protectedProcedure
     })
   )
   .mutation(async ({ ctx, input }) => {
-    const { user, prisma } = ctx;
-    const { id, ...updates } = input;
-
     const event = await prisma.event.findUnique({
-      where: { id },
+      where: { id: input.id },
     });
 
     if (!event) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Evento no encontrado',
-      });
+      throw new Error('Event not found');
     }
 
-    if (!canEditEvent(user, event)) {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'No tienes permiso para editar este evento',
-      });
+    if (!canUserEditEvent(ctx.user.id, event.createdBy, ctx.user.role)) {
+      throw new Error('You do not have permission to edit this event');
     }
 
+    const { id, ...updates } = input;
     const updatedEvent = await prisma.event.update({
       where: { id },
       data: {
         ...updates,
         date: updates.date ? new Date(updates.date) : undefined,
       },
-      include: {
-        creator: {
-          select: {
-            id: true,
-            fullName: true,
-            email: true,
-          },
-        },
-        organization: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
     });
 
-    return {
-      ...updatedEvent,
-      date: updatedEvent.date.toISOString(),
-      createdAt: updatedEvent.createdAt.toISOString(),
-      updatedAt: updatedEvent.updatedAt.toISOString(),
-    };
+    return updatedEvent;
   });
-
-export default updateEventRoute;

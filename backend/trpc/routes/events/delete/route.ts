@@ -1,29 +1,25 @@
-import { protectedProcedure } from "@/backend/trpc/create-context";
-import { canEditEvent } from "@/backend/lib/permissions";
-import { z } from "zod";
-import { TRPCError } from "@trpc/server";
+import { z } from 'zod';
+import { protectedProcedure } from '../../../create-context';
+import { prisma } from '../../../../lib/prisma';
+import { canUserDeleteEvent } from '../../../../lib/permissions';
 
 export const deleteEventRoute = protectedProcedure
-  .input(z.object({ id: z.string() }))
+  .input(
+    z.object({
+      id: z.string(),
+    })
+  )
   .mutation(async ({ ctx, input }) => {
-    const { user, prisma } = ctx;
-
     const event = await prisma.event.findUnique({
       where: { id: input.id },
     });
 
     if (!event) {
-      throw new TRPCError({
-        code: 'NOT_FOUND',
-        message: 'Evento no encontrado',
-      });
+      throw new Error('Event not found');
     }
 
-    if (!canEditEvent(user, event)) {
-      throw new TRPCError({
-        code: 'FORBIDDEN',
-        message: 'No tienes permiso para eliminar este evento',
-      });
+    if (!canUserDeleteEvent(ctx.user.id, event.createdBy, ctx.user.role)) {
+      throw new Error('You do not have permission to delete this event');
     }
 
     await prisma.event.delete({
@@ -32,5 +28,3 @@ export const deleteEventRoute = protectedProcedure
 
     return { success: true };
   });
-
-export default deleteEventRoute;
