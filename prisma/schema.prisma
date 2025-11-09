@@ -159,6 +159,7 @@ model Ticket {
   eventId               String
   name                  String
   description           String?
+  imageUrl              String?            @db.Text
   price                 Float
   currency              String             @default("MXN")
   capacityType          TicketCapacityType

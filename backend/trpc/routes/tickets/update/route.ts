@@ -8,6 +8,7 @@ export const updateTicketRoute = protectedProcedure
       id: z.string(),
       name: z.string().optional(),
       description: z.string().optional(),
+      imageUrl: z.string().optional(),
       price: z.number().optional(),
       currency: z.string().optional(),
       capacityType: z.enum(['unlimited', 'dedicated', 'shared']).optional(),

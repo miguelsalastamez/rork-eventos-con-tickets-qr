@@ -8,6 +8,7 @@ export const createTicketRoute = protectedProcedure
       eventId: z.string(),
       name: z.string(),
       description: z.string().optional(),
+      imageUrl: z.string().optional(),
       price: z.number(),
       currency: z.string().default('MXN'),
       capacityType: z.enum(['unlimited', 'dedicated', 'shared']),

@@ -12,10 +12,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Plus, Trash2, Image as ImageIcon } from 'lucide-react-native';
+import { Plus, Trash2, Calendar } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTickets } from '@/contexts/TicketContext';
 import { useEvents } from '@/contexts/EventContext';
 import { Ticket, CapacityType, FormField } from '@/types';
+import ImagePicker from '@/components/ImagePicker';
 
 const isWeb = Platform.OS === 'web';
 
@@ -45,6 +47,12 @@ export default function EditTicketScreen() {
   const [newPoolName, setNewPoolName] = useState('');
   const [newPoolCapacity, setNewPoolCapacity] = useState('');
   const [isActive, setIsActive] = useState(true);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showStartTimePicker, setShowStartTimePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [showEndTimePicker, setShowEndTimePicker] = useState(false);
+  const [startDate, setStartDate] = useState(new Date());
+  const [endDate, setEndDate] = useState(new Date());
 
   const primaryColor = event?.primaryColor || '#6366f1';
 
@@ -64,6 +72,13 @@ export default function EditTicketScreen() {
       setSalesLimit(ticket.salesLimit?.toString() || '');
       setFormFields(ticket.formFields || []);
       setIsActive(ticket.isActive);
+      
+      if (ticket.saleStartDate) {
+        setStartDate(new Date(ticket.saleStartDate));
+      }
+      if (ticket.saleEndDate) {
+        setEndDate(new Date(ticket.saleEndDate));
+      }
     }
   }, [ticket]);
 
@@ -213,24 +228,15 @@ export default function EditTicketScreen() {
               />
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>URL de Imagen del Ticket</Text>
-              <View style={styles.iconInputContainer}>
-                <ImageIcon color="#6366f1" size={20} />
-                <TextInput
-                  style={styles.iconInput}
-                  value={imageUrl}
-                  onChangeText={setImageUrl}
-                  placeholder="https://ejemplo.com/imagen-ubicacion.jpg"
-                  placeholderTextColor="#9ca3af"
-                  keyboardType="url"
-                  autoCapitalize="none"
-                />
-              </View>
-              <Text style={styles.helperText}>
-                Imagen del plano de ubicación de los asientos o sección
-              </Text>
-            </View>
+            <ImagePicker
+              label="Imagen del Ticket"
+              helperText="Imagen del plano de ubicación de los asientos o sección"
+              value={imageUrl}
+              onChange={setImageUrl}
+              aspectRatio={[16, 9]}
+              maxWidth={1920}
+              maxHeight={1080}
+            />
 
             <View style={styles.row}>
               <View style={[styles.inputGroup, styles.flex1]}>
@@ -271,13 +277,48 @@ export default function EditTicketScreen() {
                   } as any}
                 />
               ) : (
-                <TextInput
-                  style={styles.input}
-                  value={saleStartDate}
-                  onChangeText={setSaleStartDate}
-                  placeholder="YYYY-MM-DDTHH:MM"
-                  placeholderTextColor="#9ca3af"
-                />
+                <>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowStartDatePicker(true)}
+                  >
+                    <Calendar color="#6366f1" size={20} />
+                    <Text style={styles.dateButtonText}>
+                      {saleStartDate ? new Date(saleStartDate).toLocaleString('es-MX', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      }) : 'Seleccionar fecha y hora'}
+                    </Text>
+                  </TouchableOpacity>
+                  {showStartDatePicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowStartDatePicker(false);
+                        if (event.type === 'set' && selectedDate) {
+                          setStartDate(selectedDate);
+                          setShowStartTimePicker(true);
+                        }
+                      }}
+                    />
+                  )}
+                  {showStartTimePicker && (
+                    <DateTimePicker
+                      value={startDate}
+                      mode="time"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowStartTimePicker(false);
+                        if (event.type === 'set' && selectedDate) {
+                          setStartDate(selectedDate);
+                          setSaleStartDate(selectedDate.toISOString());
+                        }
+                      }}
+                    />
+                  )}
+                </>
               )}
             </View>
 
@@ -295,13 +336,48 @@ export default function EditTicketScreen() {
                   } as any}
                 />
               ) : (
-                <TextInput
-                  style={styles.input}
-                  value={saleEndDate}
-                  onChangeText={setSaleEndDate}
-                  placeholder="YYYY-MM-DDTHH:MM"
-                  placeholderTextColor="#9ca3af"
-                />
+                <>
+                  <TouchableOpacity
+                    style={styles.dateButton}
+                    onPress={() => setShowEndDatePicker(true)}
+                  >
+                    <Calendar color="#6366f1" size={20} />
+                    <Text style={styles.dateButtonText}>
+                      {saleEndDate ? new Date(saleEndDate).toLocaleString('es-MX', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
+                      }) : 'Seleccionar fecha y hora'}
+                    </Text>
+                  </TouchableOpacity>
+                  {showEndDatePicker && (
+                    <DateTimePicker
+                      value={endDate}
+                      mode="date"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowEndDatePicker(false);
+                        if (event.type === 'set' && selectedDate) {
+                          setEndDate(selectedDate);
+                          setShowEndTimePicker(true);
+                        }
+                      }}
+                    />
+                  )}
+                  {showEndTimePicker && (
+                    <DateTimePicker
+                      value={endDate}
+                      mode="time"
+                      display="default"
+                      onChange={(event, selectedDate) => {
+                        setShowEndTimePicker(false);
+                        if (event.type === 'set' && selectedDate) {
+                          setEndDate(selectedDate);
+                          setSaleEndDate(selectedDate.toISOString());
+                        }
+                      }}
+                    />
+                  )}
+                </>
               )}
             </View>
 
@@ -561,7 +637,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
     paddingTop: 14,
   },
-  iconInputContainer: {
+  dateButton: {
     backgroundColor: '#fff',
     borderWidth: 1,
     borderColor: '#e5e7eb',
@@ -572,11 +648,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
   },
-  iconInput: {
-    flex: 1,
+  dateButtonText: {
     fontSize: 16,
     color: '#111827',
-    padding: 0,
+    flex: 1,
   },
   helperText: {
     fontSize: 14,
