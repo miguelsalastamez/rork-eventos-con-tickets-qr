@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Plus, Trash2, Calendar } from 'lucide-react-native';
+import { Plus, Trash2, Calendar, X } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTickets } from '@/contexts/TicketContext';
 import { useEvents } from '@/contexts/EventContext';
@@ -266,16 +266,27 @@ export default function EditTicketScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Fecha de Inicio de Venta *</Text>
               {isWeb ? (
-                <input
-                  type="datetime-local"
-                  value={saleStartDate}
-                  onChange={(e) => setSaleStartDate(e.target.value)}
-                  style={{
-                    ...styles.input,
-                    fontSize: 16,
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                  } as any}
-                />
+                <View style={styles.dateInputContainer}>
+                  <input
+                    type="datetime-local"
+                    value={saleStartDate ? new Date(saleStartDate).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setSaleStartDate(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    style={{
+                      ...styles.input,
+                      fontSize: 16,
+                      fontFamily: 'system-ui, -apple-system, sans-serif',
+                      flex: 1,
+                    } as any}
+                  />
+                  {saleStartDate && (
+                    <TouchableOpacity
+                      style={styles.clearButton}
+                      onPress={() => setSaleStartDate('')}
+                    >
+                      <X color="#ef4444" size={20} />
+                    </TouchableOpacity>
+                  )}
+                </View>
               ) : (
                 <>
                   <TouchableOpacity
@@ -325,16 +336,27 @@ export default function EditTicketScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Fecha de Fin de Venta *</Text>
               {isWeb ? (
-                <input
-                  type="datetime-local"
-                  value={saleEndDate}
-                  onChange={(e) => setSaleEndDate(e.target.value)}
-                  style={{
-                    ...styles.input,
-                    fontSize: 16,
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                  } as any}
-                />
+                <View style={styles.dateInputContainer}>
+                  <input
+                    type="datetime-local"
+                    value={saleEndDate ? new Date(saleEndDate).toISOString().slice(0, 16) : ''}
+                    onChange={(e) => setSaleEndDate(e.target.value ? new Date(e.target.value).toISOString() : '')}
+                    style={{
+                      ...styles.input,
+                      fontSize: 16,
+                      fontFamily: 'system-ui, -apple-system, sans-serif',
+                      flex: 1,
+                    } as any}
+                  />
+                  {saleEndDate && (
+                    <TouchableOpacity
+                      style={styles.clearButton}
+                      onPress={() => setSaleEndDate('')}
+                    >
+                      <X color="#ef4444" size={20} />
+                    </TouchableOpacity>
+                  )}
+                </View>
               ) : (
                 <>
                   <TouchableOpacity
@@ -652,6 +674,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#111827',
     flex: 1,
+  },
+  dateInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  clearButton: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 8,
+    padding: 10,
   },
   helperText: {
     fontSize: 14,
