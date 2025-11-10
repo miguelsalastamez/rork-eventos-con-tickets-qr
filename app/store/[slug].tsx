@@ -202,16 +202,17 @@ export default function StorePage() {
                   onPress={() => router.push(`/event/${event.id}`)}
                 >
                   {event.imageUrl && (
-                    <Image
-                      source={{ uri: event.imageUrl }}
-                      style={styles.eventImage}
-                    />
+                    <>
+                      <Image
+                        source={{ uri: event.imageUrl }}
+                        style={styles.eventImage}
+                      />
+                      <LinearGradient
+                        colors={['transparent', 'rgba(0,0,0,0.8)']}
+                        style={styles.eventGradient}
+                      />
+                    </>
                   )}
-
-                  <LinearGradient
-                    colors={['transparent', 'rgba(0,0,0,0.8)']}
-                    style={styles.eventGradient}
-                  />
 
                   <View style={styles.eventContent}>
                     <Text style={styles.eventName} numberOfLines={2}>
@@ -220,14 +221,14 @@ export default function StorePage() {
 
                     <View style={styles.eventDetails}>
                       <View style={styles.eventDetailRow}>
-                        <Calendar size={14} color="#fff" strokeWidth={2} />
+                        <Calendar size={14} color="#666" strokeWidth={2} />
                         <Text style={styles.eventDetailText}>
                           {formatDate(event.date)} • {event.time}
                         </Text>
                       </View>
 
                       <View style={styles.eventDetailRow}>
-                        <MapPin size={14} color="#fff" strokeWidth={2} />
+                        <MapPin size={14} color="#666" strokeWidth={2} />
                         <Text style={styles.eventDetailText} numberOfLines={1}>
                           {event.venueName}
                         </Text>
@@ -237,7 +238,7 @@ export default function StorePage() {
                         <View style={styles.ticketInfo}>
                           <Ticket size={14} color="#4CAF50" strokeWidth={2} />
                           <Text style={styles.ticketPrice}>
-                            Desde{' '}
+                            {'Desde '}
                             {formatPrice(
                               Math.min(...event.tickets.map((t) => t.price)),
                               event.tickets[0].currency
