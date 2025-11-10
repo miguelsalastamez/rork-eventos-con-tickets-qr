@@ -51,6 +51,7 @@ import { createOrganizationRoute } from "./routes/organizations/create/route";
 import { listOrganizationsRoute } from "./routes/organizations/list/route";
 import { updateOrganizationRoute } from "./routes/organizations/update/route";
 import { deleteOrganizationRoute } from "./routes/organizations/delete/route";
+import { getOrganizationBySlugRoute } from "./routes/organizations/get-by-slug/route";
 
 export const appRouter = createTRPCRouter({
   example: createTRPCRouter({
@@ -117,6 +118,7 @@ export const appRouter = createTRPCRouter({
     list: listOrganizationsRoute,
     update: updateOrganizationRoute,
     delete: deleteOrganizationRoute,
+    getBySlug: getOrganizationBySlugRoute,
   }),
 });
 
