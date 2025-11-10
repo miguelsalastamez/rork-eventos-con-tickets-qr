@@ -70,6 +70,37 @@ function RootLayoutNav() {
           presentation: "modal"
         }} 
       />
+      <Stack.Screen 
+        name="profile" 
+        options={{ 
+          title: "Mi cuenta",
+          presentation: "modal"
+        }} 
+      />
+      <Stack.Screen 
+        name="profile/account" 
+        options={{ 
+          title: "Mi cuenta"
+        }} 
+      />
+      <Stack.Screen 
+        name="profile/security" 
+        options={{ 
+          title: "Seguridad"
+        }} 
+      />
+      <Stack.Screen 
+        name="profile/my-purchases" 
+        options={{ 
+          title: "Mis compras"
+        }} 
+      />
+      <Stack.Screen 
+        name="profile/payment-methods" 
+        options={{ 
+          title: "Métodos de pago"
+        }} 
+      />
     </Stack>
   );
 }

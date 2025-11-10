@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Plus, Calendar, MapPin, Users, Database, Settings, TrendingUp } from 'lucide-react-native';
+import { Plus, Calendar, MapPin, Users, Database, Settings, TrendingUp, User as UserIcon } from 'lucide-react-native';
 import { useEvents } from '@/contexts/EventContext';
 import { useUser } from '@/contexts/UserContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -71,6 +71,12 @@ export default function HomeScreen() {
               <Text style={styles.headerSubtitle}>Gestiona tus eventos</Text>
             </View>
             <View style={styles.headerButtons}>
+              <TouchableOpacity
+                style={styles.createButton}
+                onPress={() => router.push('/profile' as any)}
+              >
+                <UserIcon color="#fff" size={20} />
+              </TouchableOpacity>
               {user?.role === 'super_admin' && (
                 <TouchableOpacity
                   style={styles.createButton}
