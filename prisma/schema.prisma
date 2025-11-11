@@ -43,6 +43,7 @@ model User {
   email          String   @unique
   password       String
   fullName       String
+  phone          String?
   role           UserRole @default(viewer)
   organizationId String?
   createdAt      DateTime @default(now())

@@ -4,6 +4,7 @@ import loginRoute from "./routes/auth/login/route";
 import registerRoute from "./routes/auth/register/route";
 import meRoute from "./routes/auth/me/route";
 import createTestUserRoute from "./routes/auth/create-test-user/route";
+import updateProfileRoute from "./routes/auth/update-profile/route";
 
 import { createEventRoute } from "./routes/events/create/route";
 import { listEventsRoute } from "./routes/events/list/route";
@@ -62,6 +63,7 @@ export const appRouter = createTRPCRouter({
     register: registerRoute,
     me: meRoute,
     createTestUser: createTestUserRoute,
+    updateProfile: updateProfileRoute,
   }),
   events: createTRPCRouter({
     create: createEventRoute,

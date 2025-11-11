@@ -11,29 +11,37 @@ export default function AccountScreen() {
   const { user, saveUser } = useUser();
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [isSaving, setIsSaving] = useState(false);
+
+  const updateProfileMutation = trpc.auth.updateProfile.useMutation();
 
   const handleSave = async () => {
     if (!user) return;
 
-    if (!fullName.trim() || !email.trim()) {
-      Alert.alert('Error', 'Por favor completa todos los campos requeridos');
+    if (!fullName.trim()) {
+      Alert.alert('Error', 'Por favor completa el nombre completo');
       return;
     }
 
     setIsSaving(true);
     try {
+      const result = await updateProfileMutation.mutateAsync({
+        fullName,
+        phone: phone || undefined,
+      });
+      
       const updatedUser = {
         ...user,
-        fullName,
-        email,
+        fullName: result.fullName,
+        phone: result.phone || undefined,
       };
       
       await saveUser(updatedUser);
       Alert.alert('Éxito', 'Tu información ha sido actualizada correctamente');
       router.back();
     } catch (error) {
+      console.error('Error updating profile:', error);
       Alert.alert('Error', 'No se pudo actualizar tu información');
     } finally {
       setIsSaving(false);
