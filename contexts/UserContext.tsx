@@ -155,7 +155,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
       id: `user-${Date.now()}`,
       email: 'demo@example.com',
       fullName: 'Demo User',
-      phone: '',
+      phone: undefined,
       role,
       organizationId,
       createdAt: new Date().toISOString(),

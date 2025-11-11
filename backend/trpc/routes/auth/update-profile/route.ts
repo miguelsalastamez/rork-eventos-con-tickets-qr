@@ -42,10 +42,13 @@ export const updateProfileRoute = protectedProcedure
     });
 
     return {
-      ...updatedUser,
-      phone: updatedUser.phone || '',
+      id: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
+      phone: updatedUser.phone || undefined,
+      role: updatedUser.role,
+      organizationId: updatedUser.organizationId || undefined,
       createdAt: updatedUser.createdAt.toISOString(),
-      updatedAt: updatedUser.updatedAt.toISOString(),
     };
   });
 
