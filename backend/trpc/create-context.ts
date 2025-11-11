@@ -30,6 +30,9 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
       }
     } catch (error) {
       console.error('Error verifying token:', error);
+      if (error instanceof Error && error.message.includes('expirado')) {
+        console.error('Token expired - user needs to login again');
+      }
     }
   }
 

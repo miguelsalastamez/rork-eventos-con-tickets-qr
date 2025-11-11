@@ -10,14 +10,20 @@ export interface TokenPayload {
 }
 
 export function generateToken(payload: TokenPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '365d' });
 }
 
 export function verifyToken(token: string): TokenPayload {
   try {
     return jwt.verify(token, JWT_SECRET) as TokenPayload;
-  } catch {
-    throw new Error('Token inválido');
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new Error('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Error('Token inválido. Por favor, inicia sesión nuevamente.');
+    }
+    throw new Error('Error al verificar el token.');
   }
 }
 

@@ -8,7 +8,7 @@ import { trpc } from '@/lib/trpc';
 
 export default function AccountScreen() {
   const router = useRouter();
-  const { user, saveUser } = useUser();
+  const { user, saveUser, logout } = useUser();
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [isSaving, setIsSaving] = useState(false);
@@ -71,6 +71,23 @@ export default function AccountScreen() {
         errorMessage = error.data.message;
       } else if (error?.shape?.message) {
         errorMessage = error.shape.message;
+      }
+      
+      if (errorMessage.includes('expirado') || errorMessage.includes('expired') || errorMessage.includes('UNAUTHORIZED') || error?.data?.code === 'UNAUTHORIZED') {
+        Alert.alert(
+          'Sesión expirada',
+          'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+          [
+            {
+              text: 'OK',
+              onPress: async () => {
+                await logout();
+                router.replace('/admin');
+              },
+            },
+          ]
+        );
+        return;
       }
       
       Alert.alert('Error', `No se pudo actualizar tu información: ${errorMessage}`);
