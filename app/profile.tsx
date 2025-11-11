@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { 
@@ -59,7 +59,6 @@ function MenuItem({ icon, label, onPress, badge, showArrow = true, color = '#111
 export default function ProfileScreen() {
   const router = useRouter();
   const { user, permissions } = useUser();
-  const [loggingOut, setLoggingOut] = useState(false);
 
   const purchasesQuery = trpc.purchases.list.useQuery(
     { userId: user?.id },
@@ -80,8 +79,7 @@ export default function ProfileScreen() {
   const purchaseCount = purchasesQuery.data?.length || 0;
   const unreadMessages = messagesQuery.data?.filter((m: any) => !m.read).length || 0;
 
-  const handleLogout = async () => {
-    setLoggingOut(true);
+  const handleLogout = () => {
     router.replace('/');
   };
 
@@ -125,10 +123,9 @@ export default function ProfileScreen() {
             <View style={styles.roleContainer}>
               <Shield size={14} color="#fff" />
               <Text style={styles.roleText}>
-                {user.role === 'super_admin' && 'Super Admin'}
-                {user.role === 'seller_admin' && 'Administrador'}
-                {user.role === 'collaborator' && 'Colaborador'}
-                {user.role === 'viewer' && 'Visitante'}
+                {user.role === 'super_admin' ? 'Super Admin' : 
+                 user.role === 'seller_admin' ? 'Administrador' : 
+                 user.role === 'collaborator' ? 'Colaborador' : 'Visitante'}
               </Text>
             </View>
           </View>
