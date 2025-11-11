@@ -1,8 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { ShoppingBag, Calendar, MapPin, Ticket, Download } from 'lucide-react-native';
+import { ShoppingBag, Ticket, Download } from 'lucide-react-native';
 import { useUser } from '@/contexts/UserContext';
 import { trpc } from '@/lib/trpc';
 
@@ -67,10 +67,10 @@ export default function MyPurchasesScreen() {
               <View style={styles.purchaseHeader}>
                 <View style={styles.statusBadge}>
                   <Text style={styles.statusText}>
-                    {purchase.status === 'completed' && 'Confirmado'}
-                    {purchase.status === 'pending' && 'Pendiente'}
-                    {purchase.status === 'awaiting_transfer_confirmation' && 'En revisión'}
-                    {purchase.status === 'failed' && 'Fallido'}
+                    {purchase.status === 'completed' ? 'Confirmado' : 
+                     purchase.status === 'pending' ? 'Pendiente' : 
+                     purchase.status === 'awaiting_transfer_confirmation' ? 'En revisión' : 
+                     purchase.status === 'failed' ? 'Fallido' : 'Desconocido'}
                   </Text>
                 </View>
                 <Text style={styles.purchaseDate}>
