@@ -26,16 +26,23 @@ export default function AccountScreen() {
 
     setIsSaving(true);
     try {
+      const phoneValue = phone.trim() || null;
+      console.log('Saving profile with phone:', phoneValue);
+      
       const result = await updateProfileMutation.mutateAsync({
         fullName,
-        phone: phone.trim() || null,
+        phone: phoneValue,
       });
+      
+      console.log('Profile update result:', result);
       
       const updatedUser = {
         ...user,
         fullName: result.fullName,
-        phone: result.phone,
+        phone: result.phone || undefined,
       };
+      
+      console.log('Updated user object:', updatedUser);
       
       await saveUser(updatedUser);
       Alert.alert('Éxito', 'Tu información ha sido actualizada correctamente');

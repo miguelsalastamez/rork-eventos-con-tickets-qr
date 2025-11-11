@@ -12,7 +12,7 @@ export const updateProfileRoute = protectedProcedure
     const userId = ctx.user.id;
 
     console.log('Updating profile for user:', userId);
-    console.log('Input data:', input);
+    console.log('Input data:', JSON.stringify(input, null, 2));
 
     const updateData: { fullName?: string; phone?: string | null } = {};
     
@@ -24,7 +24,7 @@ export const updateProfileRoute = protectedProcedure
       updateData.phone = input.phone;
     }
 
-    console.log('Update data to save:', updateData);
+    console.log('Update data to save:', JSON.stringify(updateData, null, 2));
 
     const updatedUser = await ctx.prisma.user.update({
       where: { id: userId },
@@ -41,15 +41,26 @@ export const updateProfileRoute = protectedProcedure
       },
     });
 
-    return {
+    console.log('User updated in database:', JSON.stringify({
       id: updatedUser.id,
       email: updatedUser.email,
       fullName: updatedUser.fullName,
-      phone: updatedUser.phone || undefined,
+      phone: updatedUser.phone,
+    }, null, 2));
+
+    const result = {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
+      phone: updatedUser.phone ?? undefined,
       role: updatedUser.role,
-      organizationId: updatedUser.organizationId || undefined,
+      organizationId: updatedUser.organizationId ?? undefined,
       createdAt: updatedUser.createdAt.toISOString(),
     };
+
+    console.log('Returning result:', JSON.stringify(result, null, 2));
+
+    return result;
   });
 
 export default updateProfileRoute;
