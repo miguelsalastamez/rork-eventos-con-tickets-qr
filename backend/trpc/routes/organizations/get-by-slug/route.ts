@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { TRPCError } from '@trpc/server';
 import { publicProcedure } from '../../../create-context';
 import { prisma } from '../../../../lib/prisma';
 
@@ -51,7 +52,10 @@ export const getOrganizationBySlugRoute = publicProcedure
     });
 
     if (!organization) {
-      throw new Error('Organización no encontrada');
+      throw new TRPCError({
+        code: 'NOT_FOUND',
+        message: 'Organización no encontrada',
+      });
     }
 
     return organization;
