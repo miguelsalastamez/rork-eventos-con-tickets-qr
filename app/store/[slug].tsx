@@ -181,7 +181,7 @@ export default function StorePage() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Eventos Próximos</Text>
             <Text style={styles.eventCount}>
-              {org.events.length} {org.events.length !== 1 ? 'eventos' : 'evento'}
+              {org.events.length} evento{org.events.length !== 1 ? 's' : ''}
             </Text>
           </View>
 
@@ -249,7 +249,8 @@ export default function StorePage() {
 
                     <View style={styles.eventFooter}>
                       <Text style={styles.attendeesCount}>
-                        {event._count.attendees} {event._count.attendees !== 1 ? 'asistentes' : 'asistente'}
+                        {event._count.attendees} asistente
+                        {event._count.attendees !== 1 ? 's' : ''}
                       </Text>
                       <View style={styles.viewButton}>
                         <Text style={styles.viewButtonText}>Ver detalles</Text>
