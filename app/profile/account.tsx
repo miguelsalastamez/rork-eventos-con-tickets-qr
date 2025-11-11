@@ -28,7 +28,7 @@ export default function AccountScreen() {
     try {
       const result = await updateProfileMutation.mutateAsync({
         fullName,
-        phone: phone || undefined,
+        phone: phone.trim() || null,
       });
       
       const updatedUser = {

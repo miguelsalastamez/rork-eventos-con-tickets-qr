@@ -5,18 +5,25 @@ export const updateProfileRoute = protectedProcedure
   .input(
     z.object({
       fullName: z.string().min(1).optional(),
-      phone: z.string().optional(),
+      phone: z.string().nullable().optional(),
     })
   )
   .mutation(async ({ ctx, input }) => {
     const userId = ctx.user.id;
 
+    const updateData: { fullName?: string; phone?: string | null } = {};
+    
+    if (input.fullName !== undefined) {
+      updateData.fullName = input.fullName;
+    }
+    
+    if (input.phone !== undefined) {
+      updateData.phone = input.phone;
+    }
+
     const updatedUser = await ctx.prisma.user.update({
       where: { id: userId },
-      data: {
-        fullName: input.fullName,
-        phone: input.phone,
-      },
+      data: updateData,
       select: {
         id: true,
         email: true,
