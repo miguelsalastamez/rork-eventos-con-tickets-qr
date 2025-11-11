@@ -101,6 +101,12 @@ function RootLayoutNav() {
           title: "Métodos de pago"
         }} 
       />
+      <Stack.Screen 
+        name="store/[slug]" 
+        options={{ 
+          title: "Tienda"
+        }} 
+      />
     </Stack>
   );
 }
