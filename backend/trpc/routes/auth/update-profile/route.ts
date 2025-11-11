@@ -60,10 +60,9 @@ export const updateProfileRoute = protectedProcedure
       id: updatedUser.id,
       email: updatedUser.email,
       fullName: updatedUser.fullName,
-      phone: updatedUser.phone,
+      phone: updatedUser.phone ?? null,
       role: updatedUser.role,
-      organizationId: updatedUser.organizationId,
-      createdAt: updatedUser.createdAt.toISOString(),
+      organizationId: updatedUser.organizationId ?? null,
     };
   });
 
