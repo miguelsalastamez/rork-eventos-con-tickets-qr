@@ -41,7 +41,12 @@ export const updateProfileRoute = protectedProcedure
       },
     });
 
-    return updatedUser;
+    return {
+      ...updatedUser,
+      phone: updatedUser.phone || '',
+      createdAt: updatedUser.createdAt.toISOString(),
+      updatedAt: updatedUser.updatedAt.toISOString(),
+    };
   });
 
 export default updateProfileRoute;

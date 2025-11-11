@@ -44,7 +44,7 @@ export default publicProcedure
         id: user.id,
         email: user.email,
         fullName: user.fullName,
-        phone: user.phone || undefined,
+        phone: user.phone || '',
         role: user.role,
         organizationId: user.organizationId || undefined,
         createdAt: user.createdAt.toISOString(),

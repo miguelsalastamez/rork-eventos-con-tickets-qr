@@ -34,7 +34,7 @@ export default function AccountScreen() {
       const updatedUser = {
         ...user,
         fullName: result.fullName,
-        phone: result.phone || undefined,
+        phone: result.phone || '',
       };
       
       await saveUser(updatedUser);
