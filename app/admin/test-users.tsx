@@ -15,6 +15,7 @@ import { useUser } from '@/contexts/UserContext';
 import { useEvents } from '@/contexts/EventContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserRole } from '@/types';
+import { trpcClient } from '@/lib/trpc';
 
 interface TestUser {
   id: string;
@@ -121,16 +122,38 @@ export default function TestUsersScreen() {
 
   const loginAsUser = async (testUser: TestUser) => {
     try {
-      const newUser = {
-        id: testUser.id,
-        email: testUser.email,
-        fullName: testUser.fullName,
-        role: testUser.role,
-        organizationId: testUser.organizationId,
-        createdAt: new Date().toISOString(),
-      };
+      let response;
+      try {
+        response = await trpcClient.auth.login.mutate({
+          email: testUser.email,
+          password: testUser.password,
+        });
+      } catch (loginError) {
+        console.log('User does not exist in DB, creating...');
+        try {
+          await trpcClient.auth.register.mutate({
+            email: testUser.email,
+            password: testUser.password,
+            fullName: testUser.fullName,
+            role: testUser.role,
+            organizationId: testUser.organizationId,
+          });
+          
+          response = await trpcClient.auth.login.mutate({
+            email: testUser.email,
+            password: testUser.password,
+          });
+        } catch (registerError) {
+          console.error('Error registering user:', registerError);
+          throw registerError;
+        }
+      }
 
-      await saveUser(newUser);
+      if (!response) {
+        throw new Error('No se pudo obtener respuesta del servidor');
+      }
+
+      await saveUser(response.user, response.token);
 
       Alert.alert(
         '✅ Sesión Iniciada',
@@ -148,7 +171,7 @@ export default function TestUsersScreen() {
       );
     } catch (error) {
       console.error('Error logging in as user:', error);
-      Alert.alert('Error', 'No se pudo iniciar sesión como este usuario');
+      Alert.alert('Error', `No se pudo iniciar sesión como este usuario: ${error instanceof Error ? error.message : 'Error desconocido'}`);
     }
   };
 

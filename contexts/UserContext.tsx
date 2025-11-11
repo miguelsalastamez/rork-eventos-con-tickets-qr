@@ -4,6 +4,7 @@ import createContextHook from '@nkzw/create-context-hook';
 import { User, UserRole, Organization, Permission, FeatureLimits, SubscriptionTier } from '@/types';
 
 const USER_KEY = '@user';
+const TOKEN_KEY = '@auth_token';
 const ORGANIZATIONS_KEY = '@organizations';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission> = {
@@ -88,19 +89,22 @@ const TIER_LIMITS: Record<SubscriptionTier, FeatureLimits> = {
 
 export const [UserProvider, useUser] = createContextHook(() => {
   const [user, setUser] = useState<User | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
 
   const loadData = useCallback(async () => {
     try {
-      const [userData, orgsData, tierData] = await Promise.all([
+      const [userData, tokenData, orgsData, tierData] = await Promise.all([
         AsyncStorage.getItem(USER_KEY),
+        AsyncStorage.getItem(TOKEN_KEY),
         AsyncStorage.getItem(ORGANIZATIONS_KEY),
         AsyncStorage.getItem('@subscription_tier'),
       ]);
 
       if (userData) setUser(JSON.parse(userData));
+      if (tokenData) setAuthToken(tokenData);
       if (orgsData) setOrganizations(JSON.parse(orgsData));
       if (tierData) setSubscriptionTier(tierData as SubscriptionTier);
     } catch (error) {
@@ -114,9 +118,13 @@ export const [UserProvider, useUser] = createContextHook(() => {
     loadData();
   }, [loadData]);
 
-  const saveUser = useCallback(async (userData: User) => {
+  const saveUser = useCallback(async (userData: User, token?: string) => {
     try {
       await AsyncStorage.setItem(USER_KEY, JSON.stringify(userData));
+      if (token) {
+        await AsyncStorage.setItem(TOKEN_KEY, token);
+        setAuthToken(token);
+      }
       setUser(userData);
     } catch (error) {
       console.error('Error saving user:', error);
@@ -129,6 +137,16 @@ export const [UserProvider, useUser] = createContextHook(() => {
       setOrganizations(orgs);
     } catch (error) {
       console.error('Error saving organizations:', error);
+    }
+  }, []);
+
+  const logout = useCallback(async () => {
+    try {
+      await AsyncStorage.multiRemove([USER_KEY, TOKEN_KEY]);
+      setUser(null);
+      setAuthToken(null);
+    } catch (error) {
+      console.error('Error logging out:', error);
     }
   }, []);
 
@@ -205,6 +223,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
 
   return useMemo(() => ({
     user,
+    authToken,
     organizations,
     currentOrganization,
     isLoading,
@@ -214,10 +233,11 @@ export const [UserProvider, useUser] = createContextHook(() => {
     setUserRole,
     createDemoUser,
     saveUser,
+    logout,
     addOrganization,
     updateOrganization,
     deleteOrganization,
     updateSubscriptionTier,
     canAccessFeature,
-  }), [user, organizations, currentOrganization, isLoading, permissions, featureLimits, subscriptionTier, setUserRole, createDemoUser, saveUser, addOrganization, updateOrganization, deleteOrganization, updateSubscriptionTier, canAccessFeature]);
+  }), [user, authToken, organizations, currentOrganization, isLoading, permissions, featureLimits, subscriptionTier, setUserRole, createDemoUser, saveUser, logout, addOrganization, updateOrganization, deleteOrganization, updateSubscriptionTier, canAccessFeature]);
 });
