@@ -317,27 +317,45 @@ export default function SettingsScreen() {
                     onPress={async () => {
                       if (user?.role === roleOption.role) return;
                       
-                      Alert.alert(
-                        'Cambiar Rol',
-                        `¿Deseas cambiar tu rol a ${roleOption.name}?`,
-                        [
-                          { text: 'Cancelar', style: 'cancel' },
-                          {
-                            text: 'Cambiar',
-                            onPress: async () => {
-                              try {
-                                await setUserRole(roleOption.role);
-                                Alert.alert(
-                                  '✅ Rol Actualizado',
-                                  `Ahora eres ${roleOption.name}. Los cambios se aplicarán inmediatamente.`
-                                );
-                              } catch {
-                                Alert.alert('Error', 'No se pudo cambiar el rol');
-                              }
+                      if (Platform.OS === 'web') {
+                        const confirmed = window.confirm(`¿Deseas cambiar tu rol a ${roleOption.name}?`);
+                        if (confirmed) {
+                          try {
+                            console.log('Changing role to:', roleOption.role);
+                            await setUserRole(roleOption.role);
+                            console.log('Role changed successfully');
+                            window.alert(`✅ Rol Actualizado\n\nAhora eres ${roleOption.name}. Los cambios se aplicarán inmediatamente.`);
+                          } catch (error) {
+                            console.error('Error changing role:', error);
+                            window.alert('Error: No se pudo cambiar el rol');
+                          }
+                        }
+                      } else {
+                        Alert.alert(
+                          'Cambiar Rol',
+                          `¿Deseas cambiar tu rol a ${roleOption.name}?`,
+                          [
+                            { text: 'Cancelar', style: 'cancel' },
+                            {
+                              text: 'Cambiar',
+                              onPress: async () => {
+                                try {
+                                  console.log('Changing role to:', roleOption.role);
+                                  await setUserRole(roleOption.role);
+                                  console.log('Role changed successfully');
+                                  Alert.alert(
+                                    '✅ Rol Actualizado',
+                                    `Ahora eres ${roleOption.name}. Los cambios se aplicarán inmediatamente.`
+                                  );
+                                } catch (error) {
+                                  console.error('Error changing role:', error);
+                                  Alert.alert('Error', 'No se pudo cambiar el rol');
+                                }
+                              },
                             },
-                          },
-                        ]
-                      );
+                          ]
+                        );
+                      }
                     }}
                   >
                     <View style={styles.roleInfo}>
