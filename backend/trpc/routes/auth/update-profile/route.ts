@@ -1,10 +1,11 @@
 import { z } from 'zod';
 import { protectedProcedure } from '../../../create-context';
+import { TRPCError } from '@trpc/server';
 
 export const updateProfileRoute = protectedProcedure
   .input(
     z.object({
-      fullName: z.string().min(1).optional(),
+      fullName: z.string().min(1, 'El nombre completo es requerido').optional(),
       phone: z.string().nullable().optional(),
     })
   )
@@ -12,8 +13,9 @@ export const updateProfileRoute = protectedProcedure
     try {
       const userId = ctx.user.id;
 
-      console.log('Updating profile for user:', userId);
-      console.log('Input data:', JSON.stringify(input, null, 2));
+      console.log('=== UPDATE PROFILE START ===');
+      console.log('User ID:', userId);
+      console.log('Input:', input);
 
       const updateData: { fullName?: string; phone?: string | null } = {};
       
@@ -25,49 +27,44 @@ export const updateProfileRoute = protectedProcedure
         updateData.phone = input.phone;
       }
 
-      console.log('Update data to save:', JSON.stringify(updateData, null, 2));
+      console.log('Update data:', updateData);
 
       const updatedUser = await ctx.prisma.user.update({
         where: { id: userId },
         data: updateData,
-        select: {
-          id: true,
-          email: true,
-          fullName: true,
-          phone: true,
-          role: true,
-          organizationId: true,
-          createdAt: true,
-          updatedAt: true,
-        },
       });
 
-      console.log('User updated in database:', JSON.stringify({
-        id: updatedUser.id,
-        email: updatedUser.email,
-        fullName: updatedUser.fullName,
-        phone: updatedUser.phone,
-      }, null, 2));
+      console.log('User updated successfully');
 
-      console.log('Returning user data:', JSON.stringify({
+      const result = {
         id: updatedUser.id,
         email: updatedUser.email,
         fullName: updatedUser.fullName,
-        phone: updatedUser.phone,
+        phone: updatedUser.phone || null,
         role: updatedUser.role,
-      }, null, 2));
-
-      return {
-        id: updatedUser.id,
-        email: updatedUser.email,
-        fullName: updatedUser.fullName,
-        phone: updatedUser.phone ?? undefined,
-        role: updatedUser.role,
-        organizationId: updatedUser.organizationId ?? undefined,
+        organizationId: updatedUser.organizationId || null,
       };
+
+      console.log('Returning:', result);
+      console.log('=== UPDATE PROFILE END ===');
+
+      return result;
     } catch (error) {
-      console.error('Error updating profile:', error);
-      throw new Error(`Error al actualizar el perfil: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      console.error('=== UPDATE PROFILE ERROR ===');
+      console.error('Error:', error);
+      
+      if (error instanceof Error) {
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message: `Error al actualizar el perfil: ${error.message}`,
+          cause: error,
+        });
+      }
+      
+      throw new TRPCError({
+        code: 'INTERNAL_SERVER_ERROR',
+        message: 'Error desconocido al actualizar el perfil',
+      });
     }
   });
 

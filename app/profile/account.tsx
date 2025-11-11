@@ -16,7 +16,10 @@ export default function AccountScreen() {
   const updateProfileMutation = trpc.auth.updateProfile.useMutation();
 
   const handleSave = async () => {
-    if (!user) return;
+    if (!user) {
+      Alert.alert('Error', 'No hay sesión de usuario activa');
+      return;
+    }
 
     if (!fullName.trim()) {
       Alert.alert('Error', 'Por favor completa el nombre completo');
@@ -26,9 +29,10 @@ export default function AccountScreen() {
     setIsSaving(true);
     try {
       const phoneValue = phone.trim() === '' ? null : phone.trim();
-      console.log('=== SAVING PROFILE ===' );
+      
+      console.log('=== SAVING PROFILE ===');
       console.log('Full name:', fullName);
-      console.log('Phone value to save:', phoneValue);
+      console.log('Phone:', phoneValue);
       
       const result = await updateProfileMutation.mutateAsync({
         fullName: fullName.trim(),
@@ -36,17 +40,15 @@ export default function AccountScreen() {
       });
       
       console.log('=== SERVER RESPONSE ===');
-      console.log('Result:', JSON.stringify(result, null, 2));
+      console.log('Result:', result);
       
       const updatedUser = {
         ...user,
         fullName: result.fullName,
-        phone: result.phone,
+        phone: result.phone || undefined,
       };
       
-      console.log('=== SAVING TO ASYNC STORAGE ===');
-      console.log('Updated user:', JSON.stringify(updatedUser, null, 2));
-      
+      console.log('=== SAVING TO CONTEXT ===');
       await saveUser(updatedUser);
       
       console.log('=== SAVE COMPLETE ===');
@@ -55,10 +57,23 @@ export default function AccountScreen() {
       router.back();
     } catch (error: any) {
       console.error('=== ERROR UPDATING PROFILE ===');
-      console.error('Error object:', error);
+      console.error('Error:', error);
+      console.error('Error name:', error?.name);
       console.error('Error message:', error?.message);
-      console.error('Error cause:', error?.cause);
-      Alert.alert('Error', `No se pudo actualizar tu información: ${error?.message || 'Error desconocido'}`);
+      console.error('Error data:', error?.data);
+      console.error('Error shape:', error?.shape);
+      
+      let errorMessage = 'Error desconocido';
+      
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.data?.message) {
+        errorMessage = error.data.message;
+      } else if (error?.shape?.message) {
+        errorMessage = error.shape.message;
+      }
+      
+      Alert.alert('Error', `No se pudo actualizar tu información: ${errorMessage}`);
     } finally {
       setIsSaving(false);
     }

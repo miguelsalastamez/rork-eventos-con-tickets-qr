@@ -1,6 +1,5 @@
 import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { initTRPC, TRPCError } from "@trpc/server";
-import superjson from "superjson";
 import { prisma } from "@/backend/lib/prisma";
 import { verifyToken } from "@/backend/lib/auth";
 import type { User } from "@/types";
@@ -43,9 +42,7 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
 
 export type Context = Awaited<ReturnType<typeof createContext>>;
 
-const t = initTRPC.context<Context>().create({
-  transformer: superjson,
-});
+const t = initTRPC.context<Context>().create();
 
 export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
