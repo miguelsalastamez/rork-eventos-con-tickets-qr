@@ -202,7 +202,7 @@ export default function StorePage() {
                   onPress={() => router.push(`/event/${event.id}`)}
                 >
                   {event.imageUrl && (
-                    <>
+                    <View style={styles.imageContainer}>
                       <Image
                         source={{ uri: event.imageUrl }}
                         style={styles.eventImage}
@@ -211,7 +211,7 @@ export default function StorePage() {
                         colors={['transparent', 'rgba(0,0,0,0.8)']}
                         style={styles.eventGradient}
                       />
-                    </>
+                    </View>
                   )}
 
                   <View style={styles.eventContent}>
@@ -449,12 +449,17 @@ const styles = StyleSheet.create({
     height: 240,
     backgroundColor: '#e1e4e8',
   },
+  imageContainer: {
+    position: 'relative',
+    width: '100%',
+    height: 240,
+  },
   eventGradient: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
-    bottom: 0,
+    height: 240,
   },
   eventContent: {
     padding: 16,
