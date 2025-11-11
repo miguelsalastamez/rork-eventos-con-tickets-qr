@@ -538,7 +538,7 @@ export default function MessagingScreen() {
           textAlignVertical="top"
         />
         <Text style={styles.hint}>
-          Variables disponibles: {'{nombre}'}, {'{evento}'}, {'{fecha}'}, {'{hora}'}, {'{lugar}'}
+          Variables disponibles: &#123;nombre&#125;, &#123;evento&#125;, &#123;fecha&#125;, &#123;hora&#125;, &#123;lugar&#125;
         </Text>
       </View>
 
@@ -1169,7 +1169,7 @@ export default function MessagingScreen() {
                       textAlignVertical="top"
                     />
                     <Text style={styles.hint}>
-                      Variables: {'{nombre}'}, {'{evento}'}, {'{fecha}'}, {'{hora}'}, {'{lugar}'}
+                      Variables: &#123;nombre&#125;, &#123;evento&#125;, &#123;fecha&#125;, &#123;hora&#125;, &#123;lugar&#125;
                     </Text>
                   </View>
                 </>

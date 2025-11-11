@@ -41,7 +41,7 @@ export default function AccountScreen() {
       const updatedUser = {
         ...user,
         fullName: result.fullName,
-        phone: result.phone ? result.phone : undefined,
+        phone: result.phone,
       };
       
       console.log('=== SAVING TO ASYNC STORAGE ===');

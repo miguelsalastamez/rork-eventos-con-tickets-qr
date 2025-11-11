@@ -61,9 +61,9 @@ export const updateProfileRoute = protectedProcedure
         id: updatedUser.id,
         email: updatedUser.email,
         fullName: updatedUser.fullName,
-        phone: updatedUser.phone ?? null,
+        phone: updatedUser.phone ?? undefined,
         role: updatedUser.role,
-        organizationId: updatedUser.organizationId ?? null,
+        organizationId: updatedUser.organizationId ?? undefined,
       };
     } catch (error) {
       console.error('Error updating profile:', error);
