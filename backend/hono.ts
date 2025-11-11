@@ -8,6 +8,11 @@ const app = new Hono();
 
 app.use("*", cors());
 
+app.onError((err, c) => {
+  console.error('Server error:', err);
+  return c.json({ error: err.message }, 500);
+});
+
 app.use(
   "/trpc/*",
   trpcServer({

@@ -11,6 +11,9 @@ export const updateProfileRoute = protectedProcedure
   .mutation(async ({ ctx, input }) => {
     const userId = ctx.user.id;
 
+    console.log('Updating profile for user:', userId);
+    console.log('Input data:', input);
+
     const updateData: { fullName?: string; phone?: string | null } = {};
     
     if (input.fullName !== undefined) {
@@ -20,6 +23,8 @@ export const updateProfileRoute = protectedProcedure
     if (input.phone !== undefined) {
       updateData.phone = input.phone;
     }
+
+    console.log('Update data to save:', updateData);
 
     const updatedUser = await ctx.prisma.user.update({
       where: { id: userId },

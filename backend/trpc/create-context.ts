@@ -23,6 +23,7 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
           id: dbUser.id,
           email: dbUser.email,
           fullName: dbUser.fullName,
+          phone: dbUser.phone || undefined,
           role: dbUser.role as User['role'],
           organizationId: dbUser.organizationId || undefined,
           createdAt: dbUser.createdAt.toISOString(),
