@@ -10,7 +10,6 @@ export default function AccountScreen() {
   const router = useRouter();
   const { user, saveUser } = useUser();
   const [fullName, setFullName] = useState(user?.fullName || '');
-  const [email, setEmail] = useState(user?.email || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -26,30 +25,40 @@ export default function AccountScreen() {
 
     setIsSaving(true);
     try {
-      const phoneValue = phone.trim() || null;
-      console.log('Saving profile with phone:', phoneValue);
+      const phoneValue = phone.trim() === '' ? null : phone.trim();
+      console.log('=== SAVING PROFILE ===' );
+      console.log('Full name:', fullName);
+      console.log('Phone value to save:', phoneValue);
       
       const result = await updateProfileMutation.mutateAsync({
-        fullName,
+        fullName: fullName.trim(),
         phone: phoneValue,
       });
       
-      console.log('Profile update result:', result);
+      console.log('=== SERVER RESPONSE ===');
+      console.log('Result:', JSON.stringify(result, null, 2));
       
       const updatedUser = {
         ...user,
         fullName: result.fullName,
-        phone: result.phone || undefined,
+        phone: result.phone ? result.phone : undefined,
       };
       
-      console.log('Updated user object:', updatedUser);
+      console.log('=== SAVING TO ASYNC STORAGE ===');
+      console.log('Updated user:', JSON.stringify(updatedUser, null, 2));
       
       await saveUser(updatedUser);
+      
+      console.log('=== SAVE COMPLETE ===');
+      
       Alert.alert('Éxito', 'Tu información ha sido actualizada correctamente');
       router.back();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Error', 'No se pudo actualizar tu información');
+    } catch (error: any) {
+      console.error('=== ERROR UPDATING PROFILE ===');
+      console.error('Error object:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error cause:', error?.cause);
+      Alert.alert('Error', `No se pudo actualizar tu información: ${error?.message || 'Error desconocido'}`);
     } finally {
       setIsSaving(false);
     }
@@ -87,18 +96,19 @@ export default function AccountScreen() {
 
           <View style={styles.formGroup}>
             <Text style={styles.label}>Correo electrónico *</Text>
-            <View style={styles.inputContainer}>
+            <View style={[styles.inputContainer, styles.inputContainerDisabled]}>
               <Mail color="#9ca3af" size={20} />
               <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
+                style={[styles.input, styles.inputDisabled]}
+                value={user?.email || ''}
                 placeholder="correo@ejemplo.com"
                 placeholderTextColor="#9ca3af"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={false}
               />
             </View>
+            <Text style={styles.helperText}>El correo no se puede modificar</Text>
           </View>
 
           <View style={styles.formGroup}>
@@ -216,6 +226,18 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     fontSize: 16,
     color: '#111827',
+  },
+  inputContainerDisabled: {
+    backgroundColor: '#f9fafb',
+    borderColor: '#e5e7eb',
+  },
+  inputDisabled: {
+    color: '#6b7280',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 4,
   },
   infoBox: {
     backgroundColor: '#f0f9ff',

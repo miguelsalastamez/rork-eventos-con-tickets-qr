@@ -48,19 +48,23 @@ export const updateProfileRoute = protectedProcedure
       phone: updatedUser.phone,
     }, null, 2));
 
-    const result = {
+    console.log('Returning user data:', JSON.stringify({
       id: updatedUser.id,
       email: updatedUser.email,
       fullName: updatedUser.fullName,
-      phone: updatedUser.phone ?? undefined,
+      phone: updatedUser.phone,
       role: updatedUser.role,
-      organizationId: updatedUser.organizationId ?? undefined,
+    }, null, 2));
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      fullName: updatedUser.fullName,
+      phone: updatedUser.phone,
+      role: updatedUser.role,
+      organizationId: updatedUser.organizationId,
       createdAt: updatedUser.createdAt.toISOString(),
     };
-
-    console.log('Returning result:', JSON.stringify(result, null, 2));
-
-    return result;
   });
 
 export default updateProfileRoute;
