@@ -11,6 +11,8 @@ import { listEventsRoute } from "./routes/events/list/route";
 import { getEventRoute } from "./routes/events/get/route";
 import { updateEventRoute } from "./routes/events/update/route";
 import { deleteEventRoute } from "./routes/events/delete/route";
+import { deleteAllTestDataProcedure } from "./routes/events/delete-all-test-data/route";
+import { seedTestDataProcedure } from "./routes/events/seed-test-data/route";
 
 import { createAttendeeRoute } from "./routes/attendees/create/route";
 import { createMultipleAttendeesRoute } from "./routes/attendees/create-multiple/route";
@@ -71,6 +73,8 @@ export const appRouter = createTRPCRouter({
     get: getEventRoute,
     update: updateEventRoute,
     delete: deleteEventRoute,
+    deleteAllTestData: deleteAllTestDataProcedure,
+    seedTestData: seedTestDataProcedure,
   }),
   attendees: createTRPCRouter({
     create: createAttendeeRoute,

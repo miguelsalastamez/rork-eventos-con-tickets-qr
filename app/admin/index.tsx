@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Building2, Users, TrendingUp, DollarSign, Package, UserCheck } from 'lucide-react-native';
+import { Building2, Users, TrendingUp, DollarSign, Package, UserCheck, Database } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useUser } from '@/contexts/UserContext';
 import { useEvents } from '@/contexts/EventContext';
@@ -134,6 +134,14 @@ export default function AdminDashboardScreen() {
               <UserCheck color="#10b981" size={20} />
               <Text style={styles.actionButtonText}>Usuarios de Prueba</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.actionButton, styles.testDataButton]}
+              onPress={() => router.push('/admin/test-data' as any)}
+            >
+              <Database color="#3b82f6" size={20} />
+              <Text style={styles.actionButtonText}>Gestión de Datos de Prueba</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
@@ -235,6 +243,10 @@ const styles = StyleSheet.create({
     fontWeight: '500' as const,
     color: '#374151',
     flex: 1,
+  },
+  testDataButton: {
+    backgroundColor: '#eff6ff',
+    borderColor: '#3b82f6',
   },
   errorText: {
     fontSize: 18,
