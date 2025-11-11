@@ -238,8 +238,7 @@ export default function StorePage() {
                         <View style={styles.ticketInfo}>
                           <Ticket size={14} color="#4CAF50" strokeWidth={2} />
                           <Text style={styles.ticketPrice}>
-                            {'Desde '}
-                            {formatPrice(
+                            Desde {formatPrice(
                               Math.min(...event.tickets.map((t) => t.price)),
                               event.tickets[0].currency
                             )}
