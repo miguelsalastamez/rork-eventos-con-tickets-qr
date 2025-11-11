@@ -241,29 +241,18 @@ export default function EditEventScreen() {
               {isWeb ? (
                 <View style={styles.dateInputContainer}>
                   <Calendar color="#6366f1" size={20} />
-                  <View style={{ flex: 1 }}>
-                    <input
-                      type="date"
-                      value={date.toISOString().split('T')[0]}
-                      onChange={(e) => {
-                        const newDate = new Date(e.target.value + 'T12:00:00');
-                        if (!isNaN(newDate.getTime())) {
-                          setDate(newDate);
-                        }
-                      }}
-                      min={new Date().toISOString().split('T')[0]}
-                      style={{
-                        width: '100%',
-                        fontSize: 16,
-                        color: '#111827',
-                        border: 'none',
-                        outline: 'none',
-                        backgroundColor: 'transparent',
-                        padding: 0,
-                        fontFamily: 'system-ui, -apple-system, sans-serif',
-                      }}
-                    />
-                  </View>
+                  <TextInput
+                    style={styles.iconInput}
+                    value={date.toISOString().split('T')[0]}
+                    onChangeText={(text) => {
+                      const newDate = new Date(text + 'T12:00:00');
+                      if (!isNaN(newDate.getTime())) {
+                        setDate(newDate);
+                      }
+                    }}
+                    placeholder="YYYY-MM-DD"
+                    placeholderTextColor="#9ca3af"
+                  />
                 </View>
               ) : (
                 <>
