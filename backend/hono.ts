@@ -3,8 +3,18 @@ import { trpcServer } from "@hono/trpc-server";
 import { cors } from "hono/cors";
 import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
+import { isDatabaseConnected } from "./lib/prisma";
 
 const app = new Hono();
+
+console.log('=== SERVER STARTING ===');
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Database URL configured:', !!process.env.DATABASE_URL);
+console.log('Database connected:', isDatabaseConnected());
+if (!isDatabaseConnected()) {
+  console.warn('⚠️  Server starting without database connection.');
+  console.warn('⚠️  Some features may not work correctly.');
+}
 
 app.use("*", cors({
   origin: '*',
@@ -45,7 +55,20 @@ app.onError((err, c) => {
 });
 
 app.get("/", (c) => {
-  return c.json({ status: "ok", message: "API is running" });
+  return c.json({ 
+    status: "ok", 
+    message: "API is running",
+    database: isDatabaseConnected() ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get("/api/health", (c) => {
+  return c.json({ 
+    status: "ok",
+    database: isDatabaseConnected() ? "connected" : "disconnected",
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.notFound((c) => {

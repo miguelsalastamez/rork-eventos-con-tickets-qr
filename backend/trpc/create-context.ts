@@ -1,6 +1,6 @@
 import { FetchCreateContextFnOptions } from "@trpc/server/adapters/fetch";
 import { initTRPC, TRPCError } from "@trpc/server";
-import { prisma } from "@/backend/lib/prisma";
+import { prisma, isDatabaseConnected } from "@/backend/lib/prisma";
 import { verifyToken } from "@/backend/lib/auth";
 import type { User } from "@/types";
 
@@ -8,7 +8,7 @@ export const createContext = async (opts: FetchCreateContextFnOptions) => {
   const authHeader = opts.req.headers.get('authorization');
   let user: User | null = null;
 
-  if (authHeader && authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ') && isDatabaseConnected()) {
     try {
       const token = authHeader.substring(7);
       const payload = verifyToken(token);
