@@ -1,9 +1,10 @@
+import './startup-check';
 import { Hono } from "hono";
 import { trpcServer } from "@hono/trpc-server";
 import { cors } from "hono/cors";
 import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
-import { isDatabaseConnected } from "./lib/prisma";
+import { isDatabaseConnected, hasPrismaClient, getDatabaseError } from "./lib/prisma";
 
 const app = new Hono();
 
@@ -14,18 +15,30 @@ console.log('📦 Environment:', process.env.NODE_ENV || 'development');
 console.log('🔧 Database URL configured:', !!process.env.DATABASE_URL);
 console.log('💾 Database connected:', isDatabaseConnected());
 console.log('🔐 JWT Secret configured:', !!process.env.JWT_SECRET && process.env.JWT_SECRET !== 'your-secret-key-change-this');
+console.log('🔌 Prisma Client available:', hasPrismaClient());
 
-if (!process.env.DATABASE_URL) {
+const dbError = getDatabaseError();
+if (dbError) {
+  console.error('\n❌ Database initialization error:', dbError.message);
+}
+
+if (!hasPrismaClient()) {
+  console.error('\n❌ CRITICAL: Prisma Client not generated!');
+  console.error('   The backend will start but database operations will fail.');
+  console.error('   TO FIX: Run `bunx prisma generate`\n');
+} else if (!process.env.DATABASE_URL) {
   console.warn('\n⚠️  WARNING: DATABASE_URL not configured!');
   console.warn('   To fix this:');
   console.warn('   1. Copy env.example to .env');
   console.warn('   2. Configure your DATABASE_URL');
   console.warn('   3. Run: bunx prisma migrate dev\n');
-}
-
-if (!isDatabaseConnected()) {
+} else if (!isDatabaseConnected()) {
   console.error('\n❌ Database connection FAILED');
-  console.error('   Server will start but most endpoints will not work.\n');
+  console.error('   Server will start but most endpoints will not work.');
+  console.error('   Make sure:');
+  console.error('   1. Database is running');
+  console.error('   2. DATABASE_URL is correct');
+  console.error('   3. Run: bunx prisma migrate dev\n');
 } else {
   console.log('\n✅ All systems ready!');
 }
