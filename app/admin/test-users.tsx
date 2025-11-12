@@ -16,6 +16,7 @@ import { useEvents } from '@/contexts/EventContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { UserRole } from '@/types';
 import { trpcClient } from '@/lib/trpc';
+import { BackendSetupMessage } from '@/components/BackendSetupMessage';
 
 interface TestUser {
   id: string;
@@ -33,6 +34,7 @@ export default function TestUsersScreen() {
   const [testUsers, setTestUsers] = useState<TestUser[]>([]);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [backendError, setBackendError] = useState<Error | null>(null);
 
   useEffect(() => {
     loadTestUsers();
@@ -171,7 +173,18 @@ export default function TestUsersScreen() {
       );
     } catch (error) {
       console.error('Error logging in as user:', error);
-      Alert.alert('Error', `No se pudo iniciar sesión como este usuario: ${error instanceof Error ? error.message : 'Error desconocido'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      
+      if (error instanceof Error && (
+        error.message.includes('404') ||
+        error.message.includes('Server did not start') ||
+        error.message.includes('Backend no disponible') ||
+        error.message.includes('No se pudo conectar')
+      )) {
+        setBackendError(error);
+      } else {
+        Alert.alert('Error', `No se pudo iniciar sesión como este usuario: ${errorMessage}`);
+      }
     }
   };
 
@@ -298,6 +311,19 @@ export default function TestUsersScreen() {
       ]
     );
   };
+
+  if (backendError) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView edges={['top']} style={styles.safeArea}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>Usuarios de Prueba</Text>
+          </View>
+        </SafeAreaView>
+        <BackendSetupMessage error={backendError} />
+      </View>
+    );
+  }
 
   if (currentUser?.role !== 'super_admin') {
     return (

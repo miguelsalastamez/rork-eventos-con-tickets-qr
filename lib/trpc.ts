@@ -43,6 +43,14 @@ export const trpcClient = trpc.createClient({
               throw new Error('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose.');
             }
             
+            if (response.status === 404 && (text.includes('openresty') || text.includes('nginx'))) {
+              throw new Error('Backend no disponible. El servidor necesita una base de datos configurada. Lee el archivo .env para instrucciones.');
+            }
+            
+            if (response.status === 408 || text.includes('Server did not start')) {
+              throw new Error('El backend no ha iniciado. Verifica que DATABASE_URL esté configurado en .env y ejecuta: bunx prisma generate');
+            }
+            
             if (response.status === 500) {
               throw new Error('Error interno del servidor. Verifica los logs del backend.');
             }

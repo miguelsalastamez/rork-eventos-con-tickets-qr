@@ -1,0 +1,32 @@
+# Base de datos PostgreSQL
+# IMPORTANTE: Necesitas una base de datos cloud para Rork
+# Opciones gratuitas:
+# - Supabase: https://supabase.com (Recomendado)
+# - Neon: https://neon.tech
+# - Railway: https://railway.app
+#
+# Para configurar rápido con Supabase:
+# 1. Crea cuenta en https://supabase.com
+# 2. Crea un nuevo proyecto
+# 3. Ve a Settings > Database > Connection string
+# 4. Copia el "Connection string" y pégalo aquí
+#
+# TEMPORAL: Base de datos de demostración (reemplázala con tu propia base de datos)
+DATABASE_URL=""
+
+# JWT Secret (genera uno seguro con: openssl rand -base64 32)
+JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
+
+# URLs del servidor
+# Para Rork platform - el backend se ejecuta en /api
+EXPO_PUBLIC_RORK_API_BASE_URL="https://rork.app/p/92loqsix46yuo4fa4rjne"
+
+EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
+
+# Configuración del servidor
+PORT=8081
+NODE_ENV=production
+
+# Configuración de subida de archivos
+MAX_FILE_SIZE=10485760
+UPLOAD_DIR="./uploads"
