@@ -1,11 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useMemo } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import { User, UserRole, Organization, Permission, FeatureLimits, SubscriptionTier } from '@/types';
-
-const USER_KEY = '@user';
-const TOKEN_KEY = '@auth_token';
-const ORGANIZATIONS_KEY = '@organizations';
+import { trpc } from '@/lib/trpc';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission> = {
   super_admin: {
@@ -88,69 +84,58 @@ const TIER_LIMITS: Record<SubscriptionTier, FeatureLimits> = {
 };
 
 export const [UserProvider, useUser] = createContextHook(() => {
-  const [user, setUser] = useState<User | null>(null);
-  const [authToken, setAuthToken] = useState<string | null>(null);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
+  const meQuery = trpc.auth.me.useQuery(undefined, {
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+  const organizationsQuery = trpc.organizations.list.useQuery();
 
-  const loadData = useCallback(async () => {
-    try {
-      const [userData, tokenData, orgsData, tierData] = await Promise.all([
-        AsyncStorage.getItem(USER_KEY),
-        AsyncStorage.getItem(TOKEN_KEY),
-        AsyncStorage.getItem(ORGANIZATIONS_KEY),
-        AsyncStorage.getItem('@subscription_tier'),
-      ]);
+  const user = meQuery.data || null;
+  const organizations = organizationsQuery.data || [];
+  const isLoading = meQuery.isLoading || organizationsQuery.isLoading;
+  const subscriptionTier: SubscriptionTier = 'free';
+  const authToken: string | null = null;
 
-      if (userData) setUser(JSON.parse(userData));
-      if (tokenData) setAuthToken(tokenData);
-      if (orgsData) setOrganizations(JSON.parse(orgsData));
-      if (tierData) setSubscriptionTier(tierData as SubscriptionTier);
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const utils = trpc.useUtils();
 
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
+  const updateProfileMutation = trpc.auth.updateProfile.useMutation({
+    onSuccess: () => {
+      utils.auth.me.invalidate();
+    },
+  });
+
+  const createOrganizationMutation = trpc.organizations.create.useMutation({
+    onSuccess: () => {
+      utils.organizations.list.invalidate();
+    },
+  });
+
+  const updateOrganizationMutation = trpc.organizations.update.useMutation({
+    onSuccess: () => {
+      utils.organizations.list.invalidate();
+    },
+  });
+
+  const deleteOrganizationMutation = trpc.organizations.delete.useMutation({
+    onSuccess: () => {
+      utils.organizations.list.invalidate();
+    },
+  });
 
   const saveUser = useCallback(async (userData: User, token?: string) => {
-    try {
-      await AsyncStorage.setItem(USER_KEY, JSON.stringify(userData));
-      if (token) {
-        await AsyncStorage.setItem(TOKEN_KEY, token);
-        setAuthToken(token);
-      }
-      setUser(userData);
-    } catch (error) {
-      console.error('Error saving user:', error);
-    }
-  }, []);
-
-  const saveOrganizations = useCallback(async (orgs: Organization[]) => {
-    try {
-      await AsyncStorage.setItem(ORGANIZATIONS_KEY, JSON.stringify(orgs));
-      setOrganizations(orgs);
-    } catch (error) {
-      console.error('Error saving organizations:', error);
-    }
-  }, []);
+    await updateProfileMutation.mutateAsync({
+      fullName: userData.fullName,
+      phone: userData.phone,
+    });
+  }, [updateProfileMutation]);
 
   const logout = useCallback(async () => {
-    try {
-      await AsyncStorage.multiRemove([USER_KEY, TOKEN_KEY]);
-      setUser(null);
-      setAuthToken(null);
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  }, []);
+    utils.auth.me.reset();
+    utils.organizations.list.reset();
+  }, [utils]);
 
   const createDemoUser = useCallback(async (role: UserRole = 'seller_admin', organizationId?: string) => {
+    console.log('Creating demo user with role:', role);
     const demoUser: User = {
       id: `user-${Date.now()}`,
       email: 'demo@example.com',
@@ -160,9 +145,8 @@ export const [UserProvider, useUser] = createContextHook(() => {
       organizationId,
       createdAt: new Date().toISOString(),
     };
-    await saveUser(demoUser);
     return demoUser;
-  }, [saveUser]);
+  }, []);
 
   const setUserRole = useCallback(async (role: UserRole) => {
     if (!user) {
@@ -171,35 +155,26 @@ export const [UserProvider, useUser] = createContextHook(() => {
       return demoUser;
     }
     console.log('Updating user role to:', role);
-    const updatedUser = { ...user, role };
-    await saveUser(updatedUser);
-    return updatedUser;
-  }, [user, saveUser, createDemoUser]);
+    await updateProfileMutation.mutateAsync({
+      role,
+    });
+    return { ...user, role };
+  }, [user, createDemoUser, updateProfileMutation]);
 
   const addOrganization = useCallback(async (org: Organization) => {
-    const newOrgs = [...organizations, org];
-    await saveOrganizations(newOrgs);
-  }, [organizations, saveOrganizations]);
+    await createOrganizationMutation.mutateAsync(org);
+  }, [createOrganizationMutation]);
 
   const updateOrganization = useCallback(async (orgId: string, updates: Partial<Organization>) => {
-    const newOrgs = organizations.map((o) =>
-      o.id === orgId ? { ...o, ...updates, updatedAt: new Date().toISOString() } : o
-    );
-    await saveOrganizations(newOrgs);
-  }, [organizations, saveOrganizations]);
+    await updateOrganizationMutation.mutateAsync({ id: orgId, ...updates });
+  }, [updateOrganizationMutation]);
 
   const deleteOrganization = useCallback(async (orgId: string) => {
-    const newOrgs = organizations.filter((o) => o.id !== orgId);
-    await saveOrganizations(newOrgs);
-  }, [organizations, saveOrganizations]);
+    await deleteOrganizationMutation.mutateAsync({ id: orgId });
+  }, [deleteOrganizationMutation]);
 
   const updateSubscriptionTier = useCallback(async (tier: SubscriptionTier) => {
-    try {
-      await AsyncStorage.setItem('@subscription_tier', tier);
-      setSubscriptionTier(tier);
-    } catch (error) {
-      console.error('Error updating subscription tier:', error);
-    }
+    console.log('Subscription tier update not yet implemented in backend');
   }, []);
 
   const permissions = useMemo<Permission>(() => {
