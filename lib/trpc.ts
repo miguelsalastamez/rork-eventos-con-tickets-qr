@@ -28,30 +28,51 @@ export const trpcClient = trpc.createClient({
       fetch(url, options) {
         console.log('=== tRPC FETCH ===');
         console.log('URL:', url);
-        console.log('Options:', {
-          method: options?.method,
-          headers: options?.headers,
-          body: options?.body ? 'present' : 'none',
-        });
+        console.log('Method:', options?.method);
+        
         return fetch(url, options).then(async (response) => {
           console.log('=== tRPC RESPONSE ===');
-          console.log('Status:', response.status);
+          console.log('Status:', response.status, response.statusText);
           console.log('Content-Type:', response.headers.get('content-type'));
           
           if (!response.ok) {
             const text = await response.text();
-            console.error('Response error text:', text);
-            throw new Error(`HTTP ${response.status}: ${text}`);
+            console.error('❌ Backend error:', text);
+            
+            if (response.status === 0 || !response.status) {
+              throw new Error('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose.');
+            }
+            
+            if (response.status === 500) {
+              throw new Error('Error interno del servidor. Verifica los logs del backend.');
+            }
+            
+            if (response.status === 401) {
+              throw new Error('No autorizado. Por favor inicia sesión.');
+            }
+            
+            throw new Error(`Error del servidor (${response.status}): ${text.substring(0, 200)}`);
           }
           
           const contentType = response.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
             const text = await response.text();
-            console.error('Non-JSON response:', text);
-            throw new Error(`Expected JSON but got: ${text.substring(0, 100)}`);
+            console.error('❌ Respuesta no-JSON:', text.substring(0, 200));
+            
+            if (text.includes('Cannot') || text.includes('Error')) {
+              throw new Error(`Error del backend: ${text.substring(0, 200)}`);
+            }
+            
+            throw new Error('El servidor no devolvió una respuesta JSON válida');
           }
           
           return response;
+        }).catch((error) => {
+          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            console.error('❌ Error de red:', error);
+            throw new Error('No se pudo conectar al backend. Asegúrate de que esté ejecutándose en ' + getBaseUrl());
+          }
+          throw error;
         });
       },
     }),

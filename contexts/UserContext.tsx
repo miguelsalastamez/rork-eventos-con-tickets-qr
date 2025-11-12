@@ -85,12 +85,14 @@ const TIER_LIMITS: Record<SubscriptionTier, FeatureLimits> = {
 
 export const [UserProvider, useUser] = createContextHook(() => {
   const meQuery = trpc.auth.me.useQuery(undefined, {
-    retry: false,
+    retry: 1,
+    retryDelay: 1000,
     staleTime: 5 * 60 * 1000,
-    enabled: false,
   });
   const organizationsQuery = trpc.organizations.list.useQuery(undefined, {
-    enabled: false,
+    retry: 1,
+    retryDelay: 1000,
+    enabled: !!meQuery.data,
   });
 
   const user = meQuery.data || null;

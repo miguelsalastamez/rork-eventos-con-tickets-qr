@@ -5,16 +5,20 @@ import { trpc } from '@/lib/trpc';
 
 export const [EventProvider, useEvents] = createContextHook(() => {
   const eventsQuery = trpc.events.list.useQuery(undefined, {
-    enabled: false,
+    retry: 1,
+    retryDelay: 1000,
   });
   const attendeesQuery = trpc.attendees.list.useQuery(undefined, {
-    enabled: false,
+    retry: 1,
+    retryDelay: 1000,
   });
   const prizesQuery = trpc.prizes.list.useQuery(undefined, {
-    enabled: false,
+    retry: 1,
+    retryDelay: 1000,
   });
   const winnersQuery = trpc.winners.list.useQuery(undefined, {
-    enabled: false,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   const events = eventsQuery.data || [];

@@ -7,14 +7,30 @@ import { isDatabaseConnected } from "./lib/prisma";
 
 const app = new Hono();
 
-console.log('=== SERVER STARTING ===');
-console.log('Environment:', process.env.NODE_ENV || 'development');
-console.log('Database URL configured:', !!process.env.DATABASE_URL);
-console.log('Database connected:', isDatabaseConnected());
-if (!isDatabaseConnected()) {
-  console.warn('⚠️  Server starting without database connection.');
-  console.warn('⚠️  Some features may not work correctly.');
+console.log('\n' + '='.repeat(50));
+console.log('🚀 BACKEND SERVER STARTING');
+console.log('='.repeat(50));
+console.log('📦 Environment:', process.env.NODE_ENV || 'development');
+console.log('🔧 Database URL configured:', !!process.env.DATABASE_URL);
+console.log('💾 Database connected:', isDatabaseConnected());
+console.log('🔐 JWT Secret configured:', !!process.env.JWT_SECRET && process.env.JWT_SECRET !== 'your-secret-key-change-this');
+
+if (!process.env.DATABASE_URL) {
+  console.warn('\n⚠️  WARNING: DATABASE_URL not configured!');
+  console.warn('   To fix this:');
+  console.warn('   1. Copy env.example to .env');
+  console.warn('   2. Configure your DATABASE_URL');
+  console.warn('   3. Run: bunx prisma migrate dev\n');
 }
+
+if (!isDatabaseConnected()) {
+  console.error('\n❌ Database connection FAILED');
+  console.error('   Server will start but most endpoints will not work.\n');
+} else {
+  console.log('\n✅ All systems ready!');
+}
+
+console.log('='.repeat(50) + '\n');
 
 app.use("*", cors({
   origin: '*',
