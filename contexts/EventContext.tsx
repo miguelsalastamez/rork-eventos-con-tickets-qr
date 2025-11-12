@@ -4,10 +4,18 @@ import { Event, Attendee, Prize, RaffleWinner } from '@/types';
 import { trpc } from '@/lib/trpc';
 
 export const [EventProvider, useEvents] = createContextHook(() => {
-  const eventsQuery = trpc.events.list.useQuery();
-  const attendeesQuery = trpc.attendees.list.useQuery();
-  const prizesQuery = trpc.prizes.list.useQuery();
-  const winnersQuery = trpc.winners.list.useQuery();
+  const eventsQuery = trpc.events.list.useQuery(undefined, {
+    enabled: false,
+  });
+  const attendeesQuery = trpc.attendees.list.useQuery(undefined, {
+    enabled: false,
+  });
+  const prizesQuery = trpc.prizes.list.useQuery(undefined, {
+    enabled: false,
+  });
+  const winnersQuery = trpc.winners.list.useQuery(undefined, {
+    enabled: false,
+  });
 
   const events = eventsQuery.data || [];
   const attendees = attendeesQuery.data || [];

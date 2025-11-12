@@ -4,7 +4,9 @@ import { MessageTemplate, ScheduledMessage, MessageHistory, AutomatedNotificatio
 import { trpc } from '@/lib/trpc';
 
 export const [MessagingProvider, useMessaging] = createContextHook(() => {
-  const messagesQuery = trpc.messages.list.useQuery();
+  const messagesQuery = trpc.messages.list.useQuery(undefined, {
+    enabled: false,
+  });
   const messageHistory = messagesQuery.data || [];
   const isLoading = messagesQuery.isLoading;
 

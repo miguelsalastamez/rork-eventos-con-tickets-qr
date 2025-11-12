@@ -4,9 +4,15 @@ import { Ticket, CapacityPool, TicketPurchase, BuyerAccount } from '@/types';
 import { trpc } from '@/lib/trpc';
 
 export const [TicketProvider, useTickets] = createContextHook(() => {
-  const ticketsQuery = trpc.tickets.list.useQuery();
-  const poolsQuery = trpc.capacityPools.list.useQuery();
-  const purchasesQuery = trpc.purchases.list.useQuery();
+  const ticketsQuery = trpc.tickets.list.useQuery(undefined, {
+    enabled: false,
+  });
+  const poolsQuery = trpc.capacityPools.list.useQuery(undefined, {
+    enabled: false,
+  });
+  const purchasesQuery = trpc.purchases.list.useQuery(undefined, {
+    enabled: false,
+  });
 
   const tickets = ticketsQuery.data || [];
   const capacityPools = poolsQuery.data || [];

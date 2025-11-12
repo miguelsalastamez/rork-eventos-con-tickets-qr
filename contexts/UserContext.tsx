@@ -87,8 +87,11 @@ export const [UserProvider, useUser] = createContextHook(() => {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     staleTime: 5 * 60 * 1000,
+    enabled: false,
   });
-  const organizationsQuery = trpc.organizations.list.useQuery();
+  const organizationsQuery = trpc.organizations.list.useQuery(undefined, {
+    enabled: false,
+  });
 
   const user = meQuery.data || null;
   const organizations = organizationsQuery.data || [];
