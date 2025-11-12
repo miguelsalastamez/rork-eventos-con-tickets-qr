@@ -78,7 +78,7 @@ export const trpcClient = trpc.createClient({
         }).catch((error) => {
           if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             console.error('❌ Error de red:', error);
-            throw new Error('No se pudo conectar al backend. Asegúrate de que esté ejecutándose en ' + getBaseUrl());
+            throw new Error('Backend no disponible. El servidor necesita una base de datos configurada. Lee el archivo DATABASE-SETUP-RORK.md para instrucciones.');
           }
           throw error;
         });

@@ -7,6 +7,7 @@ import { useEvents } from '@/contexts/EventContext';
 import { useUser } from '@/contexts/UserContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MediaViewer from '@/components/MediaViewer';
+import { BackendSetupMessage } from '@/components/BackendSetupMessage';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -47,6 +48,12 @@ export default function HomeScreen() {
       createDemoUser('seller_admin');
     }
   }, [isLoading, user, createDemoUser]);
+
+  const { error, isError } = useEvents() as any;
+
+  if (isError && error) {
+    return <BackendSetupMessage error={error} />;
+  }
 
   if (isLoading) {
     return (

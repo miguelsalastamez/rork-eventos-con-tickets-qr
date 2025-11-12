@@ -26,6 +26,8 @@ export const [EventProvider, useEvents] = createContextHook(() => {
   const prizes = prizesQuery.data || [];
   const raffleWinners = winnersQuery.data || [];
   const isLoading = eventsQuery.isLoading || attendeesQuery.isLoading || prizesQuery.isLoading || winnersQuery.isLoading;
+  const isError = eventsQuery.isError || attendeesQuery.isError || prizesQuery.isError || winnersQuery.isError;
+  const error = eventsQuery.error || attendeesQuery.error || prizesQuery.error || winnersQuery.error;
 
   const utils = trpc.useUtils();
 
@@ -247,6 +249,8 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     prizes,
     raffleWinners,
     isLoading,
+    isError,
+    error,
     addEvent,
     updateEvent,
     deleteEvent,
@@ -271,5 +275,5 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     getEventRaffleWinners,
     deleteRaffleWinner,
     deleteAllRaffleWinners,
-  }), [events, attendees, prizes, raffleWinners, isLoading, addEvent, updateEvent, deleteEvent, addAttendee, addMultipleAttendees, checkInAttendee, toggleCheckInAttendee, checkInAllAttendees, getEventAttendees, getAttendeeByTicketCode, getEventById, getOrganizationEvents, getUserEvents, removeDuplicates, loadSampleData, addPrize, addMultiplePrizes, deletePrize, getEventPrizes, addRaffleWinner, addMultipleRaffleWinners, getEventRaffleWinners, deleteRaffleWinner, deleteAllRaffleWinners]);
+  }), [events, attendees, prizes, raffleWinners, isLoading, isError, error, addEvent, updateEvent, deleteEvent, addAttendee, addMultipleAttendees, checkInAttendee, toggleCheckInAttendee, checkInAllAttendees, getEventAttendees, getAttendeeByTicketCode, getEventById, getOrganizationEvents, getUserEvents, removeDuplicates, loadSampleData, addPrize, addMultiplePrizes, deletePrize, getEventPrizes, addRaffleWinner, addMultipleRaffleWinners, getEventRaffleWinners, deleteRaffleWinner, deleteAllRaffleWinners]);
 });
