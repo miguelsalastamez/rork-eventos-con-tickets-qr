@@ -1,6 +1,5 @@
 import { createTRPCReact, httpBatchLink } from "@trpc/react-query";
 import type { AppRouter } from "@/backend/trpc/app-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const trpc = createTRPCReact<AppRouter>();
 
@@ -18,8 +17,11 @@ export const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: `${getBaseUrl()}/api/trpc`,
-      async headers() {
-        const token = await AsyncStorage.getItem('@auth_token');
+      headers() {
+        let token = null;
+        if (typeof window !== 'undefined') {
+          token = localStorage.getItem('@auth_token');
+        }
         return {
           authorization: token ? `Bearer ${token}` : '',
           'content-type': 'application/json',
