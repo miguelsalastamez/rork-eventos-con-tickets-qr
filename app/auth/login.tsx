@@ -33,14 +33,7 @@ export default function LoginScreen() {
           localStorage.setItem('@auth_token', data.token);
         }
         
-        Alert.alert('Éxito', 'Bienvenido de vuelta', [
-          {
-            text: 'OK',
-            onPress: () => {
-              router.replace('/' as any);
-            },
-          },
-        ]);
+        router.replace('/' as any);
       } catch (error) {
         console.error('Error saving token:', error);
         Alert.alert('Error', 'No se pudo guardar la sesión');
