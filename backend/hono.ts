@@ -46,9 +46,23 @@ if (!hasPrismaClient()) {
 console.log('='.repeat(50) + '\n');
 
 app.use("*", cors({
-  origin: '*',
+  origin: (origin) => {
+    const allowedOrigins = [
+      'https://tickets.reservas.events',
+      'http://localhost:8081',
+      'http://localhost:19006',
+      'exp://192.168.0.1:8081',
+    ];
+    
+    if (!origin) return true;
+    if (allowedOrigins.includes(origin)) return origin;
+    if (origin.startsWith('exp://')) return origin;
+    if (origin.includes('localhost')) return origin;
+    
+    return allowedOrigins[0];
+  },
   allowHeaders: ['Content-Type', 'Authorization'],
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
+  allowMethods: ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
   exposeHeaders: ['Content-Length'],
   maxAge: 600,
   credentials: true,
