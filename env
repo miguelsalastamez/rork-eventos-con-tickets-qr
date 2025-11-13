@@ -15,14 +15,16 @@
 # 6. Ejecuta: bunx prisma migrate deploy
 #
 # ⚠️  IMPORTANTE: Sin DATABASE_URL el backend no funcionará
-DATABASE_URL=""
+# ⚠️  CONFIGURAR ESTO ES OBLIGATORIO PARA QUE LA APP FUNCIONE
+DATABASE_URL="postgresql://postgres:password@localhost:5432/tickets?schema=public"
 
 # JWT Secret (genera uno seguro con: openssl rand -base64 32)
 JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
 
 # URLs del servidor
-# Para Rork platform - el backend se ejecuta en /api
-EXPO_PUBLIC_RORK_API_BASE_URL="https://rork.app/p/92loqsix46yuo4fa4rjne"
+# Para producción usa tu dominio con puerto 8444 (sin barra final)
+# Para desarrollo local usa http://localhost:8081
+EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
 
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
