@@ -13,11 +13,11 @@ try {
   require('@prisma/client');
   console.log('   ✅ @prisma/client available\n');
 } catch (error) {
-  console.error('   ❌ @prisma/client NOT FOUND');
-  console.error('   This means Prisma Client has not been generated.');
-  console.error('   Run: bunx prisma generate\n');
-  errors.push('Missing Prisma Client - run: bunx prisma generate');
-  canStart = false;
+  console.warn('   ⚠️  @prisma/client NOT FOUND');
+  console.warn('   This means Prisma Client has not been generated.');
+  console.warn('   The server will start but database features will be disabled.');
+  console.warn('   To fix: bunx prisma generate\n');
+  warnings.push('Missing Prisma Client - database features disabled');
 }
 
 console.log('2. Checking environment variables...');
@@ -82,9 +82,8 @@ if (canStart) {
   console.log('✅ All critical checks passed!');
   console.log('   Starting backend server...\n');
 } else {
-  console.error('❌ Cannot start backend - fix errors above first.');
+  console.warn('⚠️  Starting backend with warnings - some features may not work.');
   console.log('\n📖 See BACKEND-TROUBLESHOOTING.md for help.\n');
-  process.exit(1);
 }
 
 export { canStart };

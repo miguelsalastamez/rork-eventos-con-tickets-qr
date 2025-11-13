@@ -50,7 +50,7 @@ export const trpcClient = trpc.createClient({
             }
             
             if (response.status === 408 || text.includes('Server did not start')) {
-              throw new Error('El backend no ha iniciado. Verifica que DATABASE_URL esté configurado en .env y ejecuta: bunx prisma generate');
+              throw new Error('Backend no disponible. El servidor necesita configuración. Contacta al administrador del sistema.');
             }
             
             if (response.status === 500) {
@@ -80,7 +80,7 @@ export const trpcClient = trpc.createClient({
         }).catch((error) => {
           if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             console.error('❌ Error de red:', error);
-            throw new Error('Backend no disponible. El servidor necesita una base de datos configurada. Lee el archivo DATABASE-SETUP-RORK.md para instrucciones.');
+            throw new Error('No se pudo conectar al servidor. Verifica tu conexión a internet o contacta al administrador.');
           }
           throw error;
         });

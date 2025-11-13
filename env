@@ -1,5 +1,5 @@
 # Base de datos PostgreSQL
-# IMPORTANTE: Necesitas una base de datos cloud para Rork
+# IMPORTANTE: Necesitas una base de datos cloud para que la app funcione
 # Opciones gratuitas:
 # - Supabase: https://supabase.com (Recomendado)
 # - Neon: https://neon.tech
@@ -9,9 +9,12 @@
 # 1. Crea cuenta en https://supabase.com
 # 2. Crea un nuevo proyecto
 # 3. Ve a Settings > Database > Connection string
-# 4. Copia el "Connection string" y pégalo aquí
+# 4. Copia el "Connection string" (Transaction pooler, Session mode) y pégalo aquí
+#    Ejemplo: postgresql://postgres.xxxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+# 5. Ejecuta: bunx prisma generate
+# 6. Ejecuta: bunx prisma migrate deploy
 #
-# TEMPORAL: Base de datos de demostración (reemplázala con tu propia base de datos)
+# ⚠️  IMPORTANTE: Sin DATABASE_URL el backend no funcionará
 DATABASE_URL=""
 
 # JWT Secret (genera uno seguro con: openssl rand -base64 32)
