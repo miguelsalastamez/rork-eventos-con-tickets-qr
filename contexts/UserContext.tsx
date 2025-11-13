@@ -1,7 +1,9 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import { User, UserRole, Organization, Permission, FeatureLimits, SubscriptionTier } from '@/types';
 import { trpc } from '@/lib/trpc';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission> = {
   super_admin: {
@@ -84,10 +86,34 @@ const TIER_LIMITS: Record<SubscriptionTier, FeatureLimits> = {
 };
 
 export const [UserProvider, useUser] = createContextHook(() => {
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  const checkAuth = useCallback(async () => {
+    try {
+      let token = null;
+      if (Platform.OS === 'web') {
+        token = localStorage.getItem('@auth_token');
+      } else {
+        token = await AsyncStorage.getItem('@auth_token');
+      }
+      setAuthToken(token);
+    } catch (error) {
+      console.error('Error checking auth:', error);
+    } finally {
+      setIsCheckingAuth(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
     staleTime: 5 * 60 * 1000,
+    enabled: !!authToken,
   });
   const organizationsQuery = trpc.organizations.list.useQuery(undefined, {
     retry: 1,
@@ -97,9 +123,9 @@ export const [UserProvider, useUser] = createContextHook(() => {
 
   const user = meQuery.data || null;
   const organizations = organizationsQuery.data || [];
-  const isLoading = meQuery.isLoading || organizationsQuery.isLoading;
+  const isLoading = isCheckingAuth || meQuery.isLoading || organizationsQuery.isLoading;
   const subscriptionTier: SubscriptionTier = 'free';
-  const authToken: string | null = null;
+  const isAuthenticated = !!authToken && !!user;
 
   const utils = trpc.useUtils();
 
@@ -135,8 +161,18 @@ export const [UserProvider, useUser] = createContextHook(() => {
   }, [updateProfileMutation]);
 
   const logout = useCallback(async () => {
-    utils.auth.me.reset();
-    utils.organizations.list.reset();
+    try {
+      if (Platform.OS === 'web') {
+        localStorage.removeItem('@auth_token');
+      } else {
+        await AsyncStorage.removeItem('@auth_token');
+      }
+      setAuthToken(null);
+      utils.auth.me.reset();
+      utils.organizations.list.reset();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   }, [utils]);
 
   const createDemoUser = useCallback(async (role: UserRole = 'seller_admin', organizationId?: string) => {
@@ -205,6 +241,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
   return useMemo(() => ({
     user,
     authToken,
+    isAuthenticated,
     organizations,
     currentOrganization,
     isLoading,
@@ -220,5 +257,6 @@ export const [UserProvider, useUser] = createContextHook(() => {
     deleteOrganization,
     updateSubscriptionTier,
     canAccessFeature,
-  }), [user, authToken, organizations, currentOrganization, isLoading, permissions, featureLimits, subscriptionTier, setUserRole, createDemoUser, saveUser, logout, addOrganization, updateOrganization, deleteOrganization, updateSubscriptionTier, canAccessFeature]);
+    checkAuth,
+  }), [user, authToken, isAuthenticated, organizations, currentOrganization, isLoading, permissions, featureLimits, subscriptionTier, setUserRole, createDemoUser, saveUser, logout, addOrganization, updateOrganization, deleteOrganization, updateSubscriptionTier, canAccessFeature, checkAuth]);
 });

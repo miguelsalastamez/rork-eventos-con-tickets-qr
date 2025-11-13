@@ -12,9 +12,15 @@ import { BackendSetupMessage } from '@/components/BackendSetupMessage';
 export default function HomeScreen() {
   const router = useRouter();
   const { events, getEventAttendees, isLoading, loadSampleData } = useEvents();
-  const { user, createDemoUser, permissions, subscriptionTier, featureLimits } = useUser();
+  const { user, isAuthenticated, permissions, subscriptionTier, featureLimits } = useUser();
   const [loadingData, setLoadingData] = useState(false);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
+
+  React.useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace('/auth/login' as any);
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   const handleLoadSampleData = async () => {
     Alert.alert(
@@ -43,19 +49,13 @@ export default function HomeScreen() {
     );
   };
 
-  React.useEffect(() => {
-    if (!isLoading && !user) {
-      createDemoUser('seller_admin');
-    }
-  }, [isLoading, user, createDemoUser]);
-
   const { error, isError } = useEvents() as any;
 
   if (isError && error) {
     return <BackendSetupMessage error={error} />;
   }
 
-  if (isLoading) {
+  if (isLoading || !isAuthenticated) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Cargando...</Text>

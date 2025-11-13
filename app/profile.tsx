@@ -58,7 +58,7 @@ function MenuItem({ icon, label, onPress, badge, showArrow = true, color = '#111
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { user, permissions } = useUser();
+  const { user, permissions, logout } = useUser();
 
   const purchasesQuery = trpc.purchases.list.useQuery(
     { userId: user?.id },
@@ -79,8 +79,9 @@ export default function ProfileScreen() {
   const purchaseCount = purchasesQuery.data?.length || 0;
   const unreadMessages = messagesQuery.data?.filter((m: any) => !m.read).length || 0;
 
-  const handleLogout = () => {
-    router.replace('/');
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/auth/login' as any);
   };
 
   if (!user) {
