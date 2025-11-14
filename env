@@ -16,7 +16,7 @@
 #
 # ⚠️  IMPORTANTE: Sin DATABASE_URL el backend no funcionará
 # ⚠️  CONFIGURAR ESTO ES OBLIGATORIO PARA QUE LA APP FUNCIONE
-DATABASE_URL="postgresql://postgres:password@localhost:5432/tickets?schema=public"
+DATABASE_URL="postgresql://eventos_user:eventos_password@localhost:5432/eventos_app"
 
 # JWT Secret (genera uno seguro con: openssl rand -base64 32)
 JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
