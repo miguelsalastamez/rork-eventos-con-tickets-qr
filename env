@@ -1,36 +1,41 @@
-# Base de datos PostgreSQL
-# IMPORTANTE: Necesitas una base de datos cloud para que la app funcione
-# Opciones gratuitas:
-# - Supabase: https://supabase.com (Recomendado)
-# - Neon: https://neon.tech
-# - Railway: https://railway.app
+# ============================================
+# 🔥 CONFIGURACIÓN PARA RORK (DESARROLLO)
+# ============================================
+# IMPORTANTE: Esta configuración es SOLO para desarrollo en Rork
+# Para producción en tu VPS, usa el archivo .env del servidor
 #
-# Para configurar rápido con Supabase:
-# 1. Crea cuenta en https://supabase.com
-# 2. Crea un nuevo proyecto
-# 3. Ve a Settings > Database > Connection string
-# 4. Copia el "Connection string" (Transaction pooler, Session mode) y pégalo aquí
-#    Ejemplo: postgresql://postgres.xxxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-# 5. Ejecuta: bunx prisma generate
-# 6. Ejecuta: bunx prisma migrate deploy
+# PASO 1: Crea una cuenta GRATIS en Supabase
+#         👉 https://supabase.com
 #
-# ⚠️  IMPORTANTE: Sin DATABASE_URL el backend no funcionará
-# ⚠️  CONFIGURAR ESTO ES OBLIGATORIO PARA QUE LA APP FUNCIONE
-DATABASE_URL="postgresql://eventos_user:eventos_password@localhost:5432/eventos_app"
+# PASO 2: Crea un nuevo proyecto
+#         - Nombre: "eventos-dev" (o el que prefieras)
+#         - Password: Guarda este password
+#         - Región: La más cercana a ti
+#
+# PASO 3: Ve a Settings → Database → Connection String
+#         Copia el "Connection Pooling" (Session mode)
+#
+# PASO 4: Pega tu connection string aquí 👇
+#         Ejemplo: postgresql://postgres.xxxx:TU_PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+DATABASE_URL="postgresql://postgres.xxxx:TU_PASSWORD_AQUI@aws-0-us-east-1.pooler.supabase.com:6543/postgres"
 
 # JWT Secret (genera uno seguro con: openssl rand -base64 32)
 JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
 
-# URLs del servidor
-# Para producción usa tu dominio con puerto 8444 (sin barra final)
-# Para desarrollo local usa http://localhost:8081
-EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
+# ============================================
+# 🌐 URL DEL BACKEND
+# ============================================
+# DESARROLLO (Rork): usa el backend local de Rork
+EXPO_PUBLIC_RORK_API_BASE_URL="http://localhost:8081"
+
+# PRODUCCIÓN (VPS): cuando hagas build, cámbialo a:
+# EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
 
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
 # Configuración del servidor
-PORT=3000
-NODE_ENV=production
+PORT=8081
+NODE_ENV=development
 
 # Configuración de subida de archivos
 MAX_FILE_SIZE=10485760
