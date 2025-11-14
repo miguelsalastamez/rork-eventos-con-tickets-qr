@@ -26,7 +26,7 @@ JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
 # 🌐 URL DEL BACKEND
 # ============================================
 # DESARROLLO (Rork): usa el backend local de Rork
-EXPO_PUBLIC_RORK_API_BASE_URL="http://localhost:8082"
+EXPO_PUBLIC_RORK_API_BASE_URL="http://localhost:8081"
 
 # PRODUCCIÓN (VPS): cuando hagas build, cámbialo a:
 # EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
