@@ -2,23 +2,30 @@ import { useCallback, useMemo } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import { Event, Attendee, Prize, RaffleWinner } from '@/types';
 import { trpc } from '@/lib/trpc';
+import { useUser } from './UserContext';
 
 export const [EventProvider, useEvents] = createContextHook(() => {
+  const { isAuthenticated, isLoading: isAuthLoading } = useUser();
+  
   const eventsQuery = trpc.events.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
+    enabled: isAuthenticated && !isAuthLoading,
   });
   const attendeesQuery = trpc.attendees.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
+    enabled: isAuthenticated && !isAuthLoading,
   });
   const prizesQuery = trpc.prizes.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
+    enabled: isAuthenticated && !isAuthLoading,
   });
   const winnersQuery = trpc.winners.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
+    enabled: isAuthenticated && !isAuthLoading,
   });
 
   const events = eventsQuery.data || [];
