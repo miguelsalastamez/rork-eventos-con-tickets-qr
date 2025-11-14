@@ -17,9 +17,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock, LogIn } from 'lucide-react-native';
 import { trpc } from '@/lib/trpc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useUser } from '@/contexts/UserContext';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { checkAuth } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -27,13 +29,19 @@ export default function LoginScreen() {
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: async (data) => {
       try {
-        await AsyncStorage.setItem('@auth_token', data.token);
-        
         if (Platform.OS === 'web') {
           localStorage.setItem('@auth_token', data.token);
+        } else {
+          await AsyncStorage.setItem('@auth_token', data.token);
         }
         
-        router.replace('/' as any);
+        await checkAuth();
+        
+        if (Platform.OS === 'web') {
+          window.location.href = '/';
+        } else {
+          router.replace('/' as any);
+        }
       } catch (error) {
         console.error('Error saving token:', error);
         Alert.alert('Error', 'No se pudo guardar la sesión');
