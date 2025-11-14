@@ -29,7 +29,7 @@ EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
 # Configuración del servidor
-PORT=8081
+PORT=3000
 NODE_ENV=production
 
 # Configuración de subida de archivos
