@@ -1,10 +1,11 @@
+// Prisma Schema para DESARROLLO en Rork (SQLite)
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 enum UserRole {
@@ -52,9 +53,6 @@ model User {
   organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   events       Event[]
   purchases    Purchase[]
-
-  @@index([email])
-  @@index([organizationId])
 }
 
 model Organization {
@@ -72,9 +70,6 @@ model Organization {
 
   users  User[]
   events Event[]
-
-  @@index([name])
-  @@index([slug])
 }
 
 model Event {
@@ -110,10 +105,6 @@ model Event {
   pools        CapacityPool[]
   purchases    Purchase[]
   messages     Message[]
-
-  @@index([createdBy])
-  @@index([organizationId])
-  @@index([date])
 }
 
 model Attendee {
@@ -128,10 +119,6 @@ model Attendee {
   createdAt      DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
-  @@index([ticketCode])
-  @@index([email])
 }
 
 model Prize {
@@ -145,8 +132,6 @@ model Prize {
 
   event   Event          @relation(fields: [eventId], references: [id], onDelete: Cascade)
   winners RaffleWinner[]
-
-  @@index([eventId])
 }
 
 model RaffleWinner {
@@ -158,9 +143,6 @@ model RaffleWinner {
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
   prize Prize @relation(fields: [prizeId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
-  @@index([prizeId])
 }
 
 model Ticket {
@@ -185,9 +167,6 @@ model Ticket {
   event    Event         @relation(fields: [eventId], references: [id], onDelete: Cascade)
   pool     CapacityPool? @relation(fields: [sharedCapacityPoolId], references: [id], onDelete: SetNull)
   purchases Purchase[]
-
-  @@index([eventId])
-  @@index([sharedCapacityPoolId])
 }
 
 model CapacityPool {
@@ -201,8 +180,6 @@ model CapacityPool {
 
   event   Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   tickets Ticket[]
-
-  @@index([eventId])
 }
 
 model Purchase {
@@ -228,11 +205,6 @@ model Purchase {
   event  Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
   ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
-  @@index([ticketId])
-  @@index([userId])
-  @@index([buyerEmail])
 }
 
 model Message {
@@ -244,6 +216,4 @@ model Message {
   sentAt    DateTime @default(now())
 
   event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
-
-  @@index([eventId])
 }

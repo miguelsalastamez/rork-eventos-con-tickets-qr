@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -168,7 +168,7 @@ model Ticket {
   eventId               String
   name                  String
   description           String?
-  imageUrl              String?
+  imageUrl              String?            @db.Text
   price                 Float
   currency              String             @default("MXN")
   capacityType          TicketCapacityType
@@ -178,7 +178,7 @@ model Ticket {
   saleStartDate         DateTime
   saleEndDate           DateTime
   isActive              Boolean            @default(true)
-  formFields            String?
+  formFields            Json?
   createdAt             DateTime           @default(now())
   updatedAt             DateTime           @updatedAt
 
@@ -218,7 +218,7 @@ model Purchase {
   buyerEmail      String
   buyerFullName   String
   buyerPhone      String?
-  formData        String?
+  formData        Json?
   paymentMethod   PaymentMethod
   paymentIntentId String?
   status          PurchaseStatus @default(pending)
