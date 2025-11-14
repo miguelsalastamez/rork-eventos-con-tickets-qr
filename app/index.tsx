@@ -16,9 +16,14 @@ export default function HomeScreen() {
   const [loadingData, setLoadingData] = useState(false);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
 
+  const hasAttemptedAuth = React.useRef(false);
+
   React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace('/auth/login' as any);
+    if (!isLoading) {
+      if (!isAuthenticated && !hasAttemptedAuth.current) {
+        hasAttemptedAuth.current = true;
+        router.replace('/auth/login' as any);
+      }
     }
   }, [isLoading, isAuthenticated, router]);
 

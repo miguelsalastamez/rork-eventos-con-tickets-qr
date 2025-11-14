@@ -36,9 +36,11 @@ export default function LoginScreen() {
           await AsyncStorage.setItem('@auth_token', data.token);
         }
         
-        await checkAuth();
+        checkAuth();
         
-        router.replace('/' as any);
+        setTimeout(() => {
+          router.replace('/' as any);
+        }, 100);
       } catch (error) {
         console.error('Error saving token:', error);
         Alert.alert('Error', 'No se pudo guardar la sesión');
