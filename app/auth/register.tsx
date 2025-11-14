@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Mail, Lock, User, UserPlus } from 'lucide-react-native';
+import { Mail, Lock, User, UserPlus, Eye, EyeOff } from 'lucide-react-native';
 import { trpc } from '@/lib/trpc';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -25,6 +25,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: async (data) => {
@@ -150,11 +152,22 @@ export default function RegisterScreen() {
                   placeholderTextColor="#9ca3af"
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoComplete="password-new"
                   editable={!isLoading}
                 />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowPassword(!showPassword)}
+                  disabled={isLoading}
+                >
+                  {showPassword ? (
+                    <EyeOff color="#6b7280" size={20} />
+                  ) : (
+                    <Eye color="#6b7280" size={20} />
+                  )}
+                </TouchableOpacity>
               </View>
 
               <View style={styles.inputContainer}>
@@ -167,11 +180,22 @@ export default function RegisterScreen() {
                   placeholderTextColor="#9ca3af"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoComplete="password-new"
                   editable={!isLoading}
                 />
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  disabled={isLoading}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff color="#6b7280" size={20} />
+                  ) : (
+                    <Eye color="#6b7280" size={20} />
+                  )}
+                </TouchableOpacity>
               </View>
 
               <TouchableOpacity
@@ -324,5 +348,9 @@ const styles = StyleSheet.create({
   linkTextBold: {
     fontWeight: '600' as const,
     color: '#6366f1',
+  },
+  eyeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
   },
 });
