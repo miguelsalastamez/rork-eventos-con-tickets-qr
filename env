@@ -17,7 +17,7 @@
 #
 # PASO 4: Pega tu connection string aquí 👇
 #         Ejemplo: postgresql://postgres.xxxx:TU_PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-DATABASE_URL="postgresql://postgres:Bi0i19c#3salas@db.qaiaigeskomvqvcvgobo.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:Bi0i19c%233salas@db.qaiaigeskomvqvcvgobo.supabase.co:5432/postgres"
 
 # JWT Secret (genera uno seguro con: openssl rand -base64 32)
 JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
