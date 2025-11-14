@@ -16,10 +16,12 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Mail, Lock, LogIn, Eye, EyeOff } from 'lucide-react-native';
 import { trpc } from '@/lib/trpc';
+import { useUser } from '@/contexts/UserContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { checkAuth } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,6 +35,8 @@ export default function LoginScreen() {
         } else {
           await AsyncStorage.setItem('@auth_token', data.token);
         }
+        
+        await checkAuth();
         
         router.replace('/' as any);
       } catch (error) {
