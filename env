@@ -1,18 +1,36 @@
-# 🚀 CONFIGURACIÓN PARA DESARROLLO EN RORK
-# Base de datos SQLite (local, no requiere servidor)
-DATABASE_URL="file:./dev.db"
+# Base de datos PostgreSQL
+# IMPORTANTE: Necesitas una base de datos cloud para que la app funcione
+# Opciones gratuitas:
+# - Supabase: https://supabase.com (Recomendado)
+# - Neon: https://neon.tech
+# - Railway: https://railway.app
+#
+# Para configurar rápido con Supabase:
+# 1. Crea cuenta en https://supabase.com
+# 2. Crea un nuevo proyecto
+# 3. Ve a Settings > Database > Connection string
+# 4. Copia el "Connection string" (Transaction pooler, Session mode) y pégalo aquí
+#    Ejemplo: postgresql://postgres.xxxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+# 5. Ejecuta: bunx prisma generate
+# 6. Ejecuta: bunx prisma migrate deploy
+#
+# ⚠️  IMPORTANTE: Sin DATABASE_URL el backend no funcionará
+# ⚠️  CONFIGURAR ESTO ES OBLIGATORIO PARA QUE LA APP FUNCIONE
+DATABASE_URL="postgresql://eventos_user:eventos_password@localhost:5432/eventos_app"
 
-# JWT Secret para desarrollo
-JWT_SECRET="rork-dev-jwt-secret-2024"
+# JWT Secret (genera uno seguro con: openssl rand -base64 32)
+JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
 
-# URLs del servidor para desarrollo local
-EXPO_PUBLIC_RORK_API_BASE_URL="http://localhost:8081"
+# URLs del servidor
+# Para producción usa tu dominio con puerto 8444 (sin barra final)
+# Para desarrollo local usa http://localhost:8081
+EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
 
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
 # Configuración del servidor
 PORT=3000
-NODE_ENV=development
+NODE_ENV=production
 
 # Configuración de subida de archivos
 MAX_FILE_SIZE=10485760
