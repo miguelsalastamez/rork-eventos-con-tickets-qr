@@ -1,42 +1,21 @@
-# ============================================
-# 🔥 CONFIGURACIÓN PARA RORK (DESARROLLO)
-# ============================================
-# IMPORTANTE: Esta configuración es SOLO para desarrollo en Rork
-# Para producción en tu VPS, usa el archivo .env del servidor
-#
-# PASO 1: Crea una cuenta GRATIS en Supabase
-#         👉 https://supabase.com
-#
-# PASO 2: Crea un nuevo proyecto
-#         - Nombre: "eventos-dev" (o el que prefieras)
-#         - Password: Guarda este password
-#         - Región: La más cercana a ti
-#
-# PASO 3: Ve a Settings → Database → Connection String
-#         Copia el "Connection Pooling" (Session mode)
-#
-# PASO 4: Pega tu connection string aquí 👇
-#         Ejemplo: postgresql://postgres.xxxx:TU_PASSWORD@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-DATABASE_URL="postgresql://postgres:Bi0i19c3salas@db.qaiaigeskomvqvcvgobo.supabase.co:5432/postgres"
+# URLs del servidor - Rork Platform
+EXPO_PUBLIC_RORK_API_BASE_URL="https://dev-92loqsix46yuo4fa4rjne.rorktest.dev"
+EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
+
+# Base de datos PostgreSQL
+# Configura esta URL con tu base de datos real
+DATABASE_URL="postgresql://eventos_user:tu_password_seguro@localhost:5432/eventos_app?schema=public"
 
 # JWT Secret (genera uno seguro con: openssl rand -base64 32)
-JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
-
-# ============================================
-# 🌐 URL DEL BACKEND
-# ============================================
-# DESARROLLO (Rork): Rork gestiona el backend automáticamente
-# NO cambies esta URL cuando trabajes en Rork
-EXPO_PUBLIC_RORK_API_BASE_URL="https://eventos-con-tickets-qr.rork.app"
-
-# PRODUCCIÓN (VPS): cuando hagas build para tu VPS, cámbialo a:
-# EXPO_PUBLIC_RORK_API_BASE_URL="https://api.tickets.reservas.events:8444"
-
-EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
+JWT_SECRET="cambia-esto-por-un-secreto-seguro-en-produccion"
 
 # Configuración del servidor
 PORT=8081
-NODE_ENV=development
+NODE_ENV=production
+
+# Stripe (opcional, para pagos con tarjeta)
+# STRIPE_SECRET_KEY="sk_test_..."
+# STRIPE_PUBLISHABLE_KEY="pk_test_..."
 
 # Configuración de subida de archivos
 MAX_FILE_SIZE=10485760

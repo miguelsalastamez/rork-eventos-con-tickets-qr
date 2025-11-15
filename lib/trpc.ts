@@ -5,13 +5,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export const trpc = createTRPCReact<AppRouter>();
 
 const getBaseUrl = () => {
-  if (process.env.EXPO_PUBLIC_RORK_API_BASE_URL) {
-    return process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
+  const url = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
+  
+  if (url) {
+    console.log('📡 Backend URL configured:', url);
+    return url;
   }
 
-  throw new Error(
-    "No base url found, please set EXPO_PUBLIC_RORK_API_BASE_URL"
-  );
+  const defaultUrl = 'https://dev-92loqsix46yuo4fa4rjne.rorktest.dev';
+  console.warn('⚠️  EXPO_PUBLIC_RORK_API_BASE_URL not set, using default:', defaultUrl);
+  return defaultUrl;
 };
 
 export const trpcClient = trpc.createClient({
