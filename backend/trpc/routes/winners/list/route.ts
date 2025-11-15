@@ -5,14 +5,14 @@ import { prisma } from '../../../../lib/prisma';
 export const listWinnersRoute = publicProcedure
   .input(
     z.object({
-      eventId: z.string().optional(),
-    }).optional()
+      eventId: z.string(),
+    })
   )
   .query(async ({ input }) => {
     const winners = await prisma.raffleWinner.findMany({
-      where: input?.eventId ? {
+      where: {
         eventId: input.eventId,
-      } : undefined,
+      },
       include: {
         prize: true,
       },

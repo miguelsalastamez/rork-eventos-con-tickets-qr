@@ -1,5 +1,6 @@
 import { createTRPCReact, httpBatchLink } from "@trpc/react-query";
 import type { AppRouter } from "@/backend/trpc/app-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const trpc = createTRPCReact<AppRouter>();
 
@@ -17,11 +18,8 @@ export const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: `${getBaseUrl()}/api/trpc`,
-      headers() {
-        let token = null;
-        if (typeof window !== 'undefined') {
-          token = localStorage.getItem('@auth_token');
-        }
+      async headers() {
+        const token = await AsyncStorage.getItem('@auth_token');
         return {
           authorization: token ? `Bearer ${token}` : '',
           'content-type': 'application/json',
@@ -43,14 +41,6 @@ export const trpcClient = trpc.createClient({
             
             if (response.status === 0 || !response.status) {
               throw new Error('No se pudo conectar al servidor. Verifica que el backend esté ejecutándose.');
-            }
-            
-            if (response.status === 404 && (text.includes('openresty') || text.includes('nginx'))) {
-              throw new Error('Backend no disponible. El servidor necesita una base de datos configurada. Lee el archivo .env para instrucciones.');
-            }
-            
-            if (response.status === 408 || text.includes('Server did not start')) {
-              throw new Error('Backend no disponible. El servidor necesita configuración. Contacta al administrador del sistema.');
             }
             
             if (response.status === 500) {
@@ -80,7 +70,7 @@ export const trpcClient = trpc.createClient({
         }).catch((error) => {
           if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             console.error('❌ Error de red:', error);
-            throw new Error('No se pudo conectar al servidor. Verifica tu conexión a internet o contacta al administrador.');
+            throw new Error('No se pudo conectar al backend. Asegúrate de que esté ejecutándose en ' + getBaseUrl());
           }
           throw error;
         });

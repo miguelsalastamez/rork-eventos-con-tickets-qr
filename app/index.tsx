@@ -7,25 +7,13 @@ import { useEvents } from '@/contexts/EventContext';
 import { useUser } from '@/contexts/UserContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MediaViewer from '@/components/MediaViewer';
-import { BackendSetupMessage } from '@/components/BackendSetupMessage';
 
 export default function HomeScreen() {
   const router = useRouter();
   const { events, getEventAttendees, isLoading, loadSampleData } = useEvents();
-  const { user, isAuthenticated, permissions, subscriptionTier, featureLimits } = useUser();
+  const { user, createDemoUser, permissions, subscriptionTier, featureLimits } = useUser();
   const [loadingData, setLoadingData] = useState(false);
   const [showRoleSelector, setShowRoleSelector] = useState(false);
-
-  const hasAttemptedAuth = React.useRef(false);
-
-  React.useEffect(() => {
-    if (!isLoading && !isAuthenticated && !hasAttemptedAuth.current) {
-      hasAttemptedAuth.current = true;
-      setTimeout(() => {
-        router.replace('/auth/login' as any);
-      }, 100);
-    }
-  }, [isLoading, isAuthenticated, router]);
 
   const handleLoadSampleData = async () => {
     Alert.alert(
@@ -54,13 +42,13 @@ export default function HomeScreen() {
     );
   };
 
-  const { error, isError } = useEvents() as any;
+  React.useEffect(() => {
+    if (!isLoading && !user) {
+      createDemoUser('seller_admin');
+    }
+  }, [isLoading, user, createDemoUser]);
 
-  if (isError && error) {
-    return <BackendSetupMessage error={error} />;
-  }
-
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
         <Text style={styles.loadingText}>Cargando...</Text>

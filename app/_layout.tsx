@@ -80,21 +80,6 @@ function RootLayoutNav() {
     <Stack screenOptions={{ headerBackTitle: "Atrás" }}>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen 
-        name="auth/login" 
-        options={{ 
-          headerShown: false,
-          presentation: "card",
-          gestureEnabled: false
-        }} 
-      />
-      <Stack.Screen 
-        name="auth/register" 
-        options={{ 
-          title: "Crear Cuenta",
-          presentation: "card"
-        }} 
-      />
-      <Stack.Screen 
         name="create-event" 
         options={{ 
           title: "Crear Evento",

@@ -2,30 +2,23 @@ import { useCallback, useMemo } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import { Event, Attendee, Prize, RaffleWinner } from '@/types';
 import { trpc } from '@/lib/trpc';
-import { useUser } from './UserContext';
 
 export const [EventProvider, useEvents] = createContextHook(() => {
-  const { isAuthenticated, isLoading: isAuthLoading } = useUser();
-  
   const eventsQuery = trpc.events.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
-    enabled: isAuthenticated && !isAuthLoading,
   });
   const attendeesQuery = trpc.attendees.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
-    enabled: isAuthenticated && !isAuthLoading,
   });
   const prizesQuery = trpc.prizes.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
-    enabled: isAuthenticated && !isAuthLoading,
   });
   const winnersQuery = trpc.winners.list.useQuery(undefined, {
     retry: 1,
     retryDelay: 1000,
-    enabled: isAuthenticated && !isAuthLoading,
   });
 
   const events = eventsQuery.data || [];
@@ -33,8 +26,6 @@ export const [EventProvider, useEvents] = createContextHook(() => {
   const prizes = prizesQuery.data || [];
   const raffleWinners = winnersQuery.data || [];
   const isLoading = eventsQuery.isLoading || attendeesQuery.isLoading || prizesQuery.isLoading || winnersQuery.isLoading;
-  const isError = eventsQuery.isError || attendeesQuery.isError || prizesQuery.isError || winnersQuery.isError;
-  const error = eventsQuery.error || attendeesQuery.error || prizesQuery.error || winnersQuery.error;
 
   const utils = trpc.useUtils();
 
@@ -256,8 +247,6 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     prizes,
     raffleWinners,
     isLoading,
-    isError,
-    error,
     addEvent,
     updateEvent,
     deleteEvent,
@@ -282,5 +271,5 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     getEventRaffleWinners,
     deleteRaffleWinner,
     deleteAllRaffleWinners,
-  }), [events, attendees, prizes, raffleWinners, isLoading, isError, error, addEvent, updateEvent, deleteEvent, addAttendee, addMultipleAttendees, checkInAttendee, toggleCheckInAttendee, checkInAllAttendees, getEventAttendees, getAttendeeByTicketCode, getEventById, getOrganizationEvents, getUserEvents, removeDuplicates, loadSampleData, addPrize, addMultiplePrizes, deletePrize, getEventPrizes, addRaffleWinner, addMultipleRaffleWinners, getEventRaffleWinners, deleteRaffleWinner, deleteAllRaffleWinners]);
+  }), [events, attendees, prizes, raffleWinners, isLoading, addEvent, updateEvent, deleteEvent, addAttendee, addMultipleAttendees, checkInAttendee, toggleCheckInAttendee, checkInAllAttendees, getEventAttendees, getAttendeeByTicketCode, getEventById, getOrganizationEvents, getUserEvents, removeDuplicates, loadSampleData, addPrize, addMultiplePrizes, deletePrize, getEventPrizes, addRaffleWinner, addMultipleRaffleWinners, getEventRaffleWinners, deleteRaffleWinner, deleteAllRaffleWinners]);
 });

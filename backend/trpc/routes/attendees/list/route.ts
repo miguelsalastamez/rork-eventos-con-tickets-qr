@@ -5,14 +5,14 @@ import { prisma } from '../../../../lib/prisma';
 export const listAttendeesRoute = protectedProcedure
   .input(
     z.object({
-      eventId: z.string().optional(),
-    }).optional()
+      eventId: z.string(),
+    })
   )
   .query(async ({ input }) => {
     const attendees = await prisma.attendee.findMany({
-      where: input?.eventId ? {
+      where: {
         eventId: input.eventId,
-      } : undefined,
+      },
       orderBy: {
         createdAt: 'desc',
       },
