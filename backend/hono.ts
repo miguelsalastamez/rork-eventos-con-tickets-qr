@@ -9,7 +9,7 @@ import { isDatabaseConnected, hasPrismaClient, getDatabaseError } from "./lib/pr
 const app = new Hono();
 
 console.log('\n' + '='.repeat(50));
-console.log('🚀 BACKEND SERVER STARTING - v1.0.5');
+console.log('🚀 BACKEND SERVER STARTING - v1.0.6');
 console.log('⏰ Timestamp:', new Date().toISOString());
 console.log('='.repeat(50));
 console.log('📦 Environment:', process.env.NODE_ENV || 'development');

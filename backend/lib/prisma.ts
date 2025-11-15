@@ -7,11 +7,19 @@ try {
   const prismaModule = require('@prisma/client');
   PrismaClient = prismaModule.PrismaClient;
   prismaClientAvailable = true;
+  console.log('✅ @prisma/client module loaded successfully');
 } catch (error) {
-  console.error('❌ Failed to import @prisma/client');
-  console.error('   This usually means Prisma Client has not been generated.');
-  console.error('   Run: bunx prisma generate');
-  console.error('   Error:', (error as Error).message);
+  console.error('\n' + '='.repeat(60));
+  console.error('❌ CRITICAL: Failed to import @prisma/client');
+  console.error('='.repeat(60));
+  console.error('This means Prisma Client has not been generated.');
+  console.error('');
+  console.error('🔧 HOW TO FIX:');
+  console.error('   1. Run: bunx prisma generate');
+  console.error('   2. Or add "postinstall": "prisma generate" to package.json scripts');
+  console.error('');
+  console.error('📋 Error details:', (error as Error).message);
+  console.error('='.repeat(60) + '\n');
   prismaClientAvailable = false;
 }
 
