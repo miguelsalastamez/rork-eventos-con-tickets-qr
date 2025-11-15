@@ -1,5 +1,5 @@
 console.log('\n' + '='.repeat(60));
-console.log('🔍 BACKEND STARTUP VALIDATION');
+console.log('🔍 BACKEND STARTUP VALIDATION - v1.0.7');
 console.log('='.repeat(60) + '\n');
 
 let canStart = true;
