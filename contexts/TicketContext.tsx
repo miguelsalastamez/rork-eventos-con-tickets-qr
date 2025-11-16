@@ -1,82 +1,61 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { Ticket, CapacityPool, TicketPurchase, BuyerAccount } from '@/types';
-import { trpc } from '@/lib/trpc';
+
+const TICKETS_STORAGE_KEY = '@eventpass_tickets';
+const CAPACITY_POOLS_STORAGE_KEY = '@eventpass_capacity_pools';
+const PURCHASES_STORAGE_KEY = '@eventpass_purchases';
+const BUYERS_STORAGE_KEY = '@eventpass_buyers';
 
 export const [TicketProvider, useTickets] = createContextHook(() => {
-  const ticketsQuery = trpc.tickets.list.useQuery(undefined, {
-    enabled: false,
-  });
-  const poolsQuery = trpc.capacityPools.list.useQuery(undefined, {
-    enabled: false,
-  });
-  const purchasesQuery = trpc.purchases.list.useQuery(undefined, {
-    enabled: false,
-  });
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [capacityPools, setCapacityPools] = useState<CapacityPool[]>([]);
+  const [purchases, setPurchases] = useState<TicketPurchase[]>([]);
+  const [buyers, setBuyers] = useState<BuyerAccount[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const tickets = ticketsQuery.data || [];
-  const capacityPools = poolsQuery.data || [];
-  const purchases = purchasesQuery.data || [];
-  const [buyers] = useState<BuyerAccount[]>([]);
-  const isLoading = ticketsQuery.isLoading || poolsQuery.isLoading || purchasesQuery.isLoading;
+  useEffect(() => {
+    loadData();
+  }, []);
 
-  const utils = trpc.useUtils();
+  const loadData = async () => {
+    try {
+      const [storedTickets, storedPools, storedPurchases, storedBuyers] = await Promise.all([
+        AsyncStorage.getItem(TICKETS_STORAGE_KEY),
+        AsyncStorage.getItem(CAPACITY_POOLS_STORAGE_KEY),
+        AsyncStorage.getItem(PURCHASES_STORAGE_KEY),
+        AsyncStorage.getItem(BUYERS_STORAGE_KEY),
+      ]);
 
-  const createTicketMutation = trpc.tickets.create.useMutation({
-    onSuccess: () => {
-      utils.tickets.list.invalidate();
-    },
-  });
-
-  const updateTicketMutation = trpc.tickets.update.useMutation({
-    onSuccess: () => {
-      utils.tickets.list.invalidate();
-    },
-  });
-
-  const deleteTicketMutation = trpc.tickets.delete.useMutation({
-    onSuccess: () => {
-      utils.tickets.list.invalidate();
-    },
-  });
-
-  const createPoolMutation = trpc.capacityPools.create.useMutation({
-    onSuccess: () => {
-      utils.capacityPools.list.invalidate();
-    },
-  });
-
-  const updatePoolMutation = trpc.capacityPools.update.useMutation({
-    onSuccess: () => {
-      utils.capacityPools.list.invalidate();
-    },
-  });
-
-  const createPurchaseMutation = trpc.purchases.create.useMutation({
-    onSuccess: () => {
-      utils.purchases.list.invalidate();
-      utils.tickets.list.invalidate();
-      utils.capacityPools.list.invalidate();
-    },
-  });
-
-  const updatePurchaseMutation = trpc.purchases.update.useMutation({
-    onSuccess: () => {
-      utils.purchases.list.invalidate();
-    },
-  });
+      if (storedTickets) setTickets(JSON.parse(storedTickets));
+      if (storedPools) setCapacityPools(JSON.parse(storedPools));
+      if (storedPurchases) setPurchases(JSON.parse(storedPurchases));
+      if (storedBuyers) setBuyers(JSON.parse(storedBuyers));
+    } catch (error) {
+      console.error('Error loading ticket data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const addTicket = useCallback(async (ticket: Ticket) => {
-    await createTicketMutation.mutateAsync(ticket);
-  }, [createTicketMutation]);
+    const updated = [...tickets, ticket];
+    setTickets(updated);
+    await AsyncStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(updated));
+  }, [tickets]);
 
   const updateTicket = useCallback(async (ticketId: string, updates: Partial<Ticket>) => {
-    await updateTicketMutation.mutateAsync({ id: ticketId, ...updates });
-  }, [updateTicketMutation]);
+    const updated = tickets.map((t) => (t.id === ticketId ? { ...t, ...updates } : t));
+    setTickets(updated);
+    await AsyncStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(updated));
+  }, [tickets]);
 
   const deleteTicket = useCallback(async (ticketId: string) => {
-    await deleteTicketMutation.mutateAsync({ id: ticketId });
-  }, [deleteTicketMutation]);
+    const updated = tickets.filter((t) => t.id !== ticketId);
+    setTickets(updated);
+    await AsyncStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(updated));
+  }, [tickets]);
 
   const getEventTickets = useCallback((eventId: string) => {
     return tickets.filter((t) => t.eventId === eventId);
@@ -109,24 +88,50 @@ export const [TicketProvider, useTickets] = createContextHook(() => {
   }, [tickets, capacityPools]);
 
   const addCapacityPool = useCallback(async (pool: CapacityPool) => {
-    await createPoolMutation.mutateAsync(pool);
-  }, [createPoolMutation]);
+    const updated = [...capacityPools, pool];
+    setCapacityPools(updated);
+    await AsyncStorage.setItem(CAPACITY_POOLS_STORAGE_KEY, JSON.stringify(updated));
+  }, [capacityPools]);
 
   const updateCapacityPool = useCallback(async (poolId: string, updates: Partial<CapacityPool>) => {
-    await updatePoolMutation.mutateAsync({ id: poolId, ...updates });
-  }, [updatePoolMutation]);
+    const updated = capacityPools.map((p) => (p.id === poolId ? { ...p, ...updates } : p));
+    setCapacityPools(updated);
+    await AsyncStorage.setItem(CAPACITY_POOLS_STORAGE_KEY, JSON.stringify(updated));
+  }, [capacityPools]);
 
   const getEventCapacityPools = useCallback((eventId: string) => {
     return capacityPools.filter((p) => p.eventId === eventId);
   }, [capacityPools]);
 
   const addPurchase = useCallback(async (purchase: TicketPurchase) => {
-    await createPurchaseMutation.mutateAsync(purchase);
-  }, [createPurchaseMutation]);
+    const updated = [...purchases, purchase];
+    setPurchases(updated);
+    await AsyncStorage.setItem(PURCHASES_STORAGE_KEY, JSON.stringify(updated));
+
+    if (purchase.ticketId) {
+      const ticket = tickets.find((t) => t.id === purchase.ticketId);
+      if (ticket) {
+        await updateTicket(ticket.id, {
+          soldCount: (ticket.soldCount || 0) + purchase.quantity,
+        });
+
+        if (ticket.capacityType === 'shared' && ticket.sharedCapacityPoolId) {
+          const pool = capacityPools.find((p) => p.id === ticket.sharedCapacityPoolId);
+          if (pool) {
+            await updateCapacityPool(pool.id, {
+              usedCapacity: pool.usedCapacity + purchase.quantity,
+            });
+          }
+        }
+      }
+    }
+  }, [purchases, tickets, capacityPools, updateTicket, updateCapacityPool]);
 
   const updatePurchase = useCallback(async (purchaseId: string, updates: Partial<TicketPurchase>) => {
-    await updatePurchaseMutation.mutateAsync({ id: purchaseId, ...updates });
-  }, [updatePurchaseMutation]);
+    const updated = purchases.map((p) => (p.id === purchaseId ? { ...p, ...updates } : p));
+    setPurchases(updated);
+    await AsyncStorage.setItem(PURCHASES_STORAGE_KEY, JSON.stringify(updated));
+  }, [purchases]);
 
   const getEventPurchases = useCallback((eventId: string) => {
     return purchases.filter((p) => p.eventId === eventId);
@@ -155,14 +160,22 @@ export const [TicketProvider, useTickets] = createContextHook(() => {
       purchases: [],
     };
     
-    console.log('Buyer accounts not yet implemented in backend');
+    const updated = [...buyers, newBuyer];
+    setBuyers(updated);
+    await AsyncStorage.setItem(BUYERS_STORAGE_KEY, JSON.stringify(updated));
     
     return newBuyer;
   }, [buyers]);
 
   const addPurchaseToBuyer = useCallback(async (buyerEmail: string, purchaseId: string) => {
-    console.log('Buyer accounts not yet implemented in backend');
-  }, []);
+    const updated = buyers.map((b) =>
+      b.email.toLowerCase() === buyerEmail.toLowerCase()
+        ? { ...b, purchases: [...b.purchases, purchaseId] }
+        : b
+    );
+    setBuyers(updated);
+    await AsyncStorage.setItem(BUYERS_STORAGE_KEY, JSON.stringify(updated));
+  }, [buyers]);
 
   const getBuyerByEmail = useCallback((email: string) => {
     return buyers.find((b) => b.email.toLowerCase() === email.toLowerCase());

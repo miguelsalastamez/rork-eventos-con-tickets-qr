@@ -1,7 +1,12 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { User, UserRole, Organization, Permission, FeatureLimits, SubscriptionTier } from '@/types';
-import { trpc } from '@/lib/trpc';
+
+const USER_STORAGE_KEY = '@eventpass_user';
+const AUTH_TOKEN_STORAGE_KEY = '@eventpass_auth_token';
+const ORGANIZATIONS_STORAGE_KEY = '@eventpass_organizations';
+const SUBSCRIPTION_TIER_STORAGE_KEY = '@eventpass_subscription_tier';
 
 const ROLE_PERMISSIONS: Record<UserRole, Permission> = {
   super_admin: {
@@ -84,60 +89,54 @@ const TIER_LIMITS: Record<SubscriptionTier, FeatureLimits> = {
 };
 
 export const [UserProvider, useUser] = createContextHook(() => {
-  const meQuery = trpc.auth.me.useQuery(undefined, {
-    retry: 1,
-    retryDelay: 1000,
-    staleTime: 5 * 60 * 1000,
-  });
-  const organizationsQuery = trpc.organizations.list.useQuery(undefined, {
-    retry: 1,
-    retryDelay: 1000,
-    enabled: !!meQuery.data,
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
+  const [isLoading, setIsLoading] = useState(true);
 
-  const user = meQuery.data || null;
-  const organizations = organizationsQuery.data || [];
-  const isLoading = meQuery.isLoading || organizationsQuery.isLoading;
-  const subscriptionTier: SubscriptionTier = 'free';
-  const authToken: string | null = null;
+  useEffect(() => {
+    loadUserData();
+  }, []);
 
-  const utils = trpc.useUtils();
+  const loadUserData = async () => {
+    try {
+      const [storedUser, storedToken, storedOrgs, storedTier] = await Promise.all([
+        AsyncStorage.getItem(USER_STORAGE_KEY),
+        AsyncStorage.getItem(AUTH_TOKEN_STORAGE_KEY),
+        AsyncStorage.getItem(ORGANIZATIONS_STORAGE_KEY),
+        AsyncStorage.getItem(SUBSCRIPTION_TIER_STORAGE_KEY),
+      ]);
 
-  const updateProfileMutation = trpc.auth.updateProfile.useMutation({
-    onSuccess: () => {
-      utils.auth.me.invalidate();
-    },
-  });
-
-  const createOrganizationMutation = trpc.organizations.create.useMutation({
-    onSuccess: () => {
-      utils.organizations.list.invalidate();
-    },
-  });
-
-  const updateOrganizationMutation = trpc.organizations.update.useMutation({
-    onSuccess: () => {
-      utils.organizations.list.invalidate();
-    },
-  });
-
-  const deleteOrganizationMutation = trpc.organizations.delete.useMutation({
-    onSuccess: () => {
-      utils.organizations.list.invalidate();
-    },
-  });
+      if (storedUser) setUser(JSON.parse(storedUser));
+      if (storedToken) setAuthToken(storedToken);
+      if (storedOrgs) setOrganizations(JSON.parse(storedOrgs));
+      if (storedTier) setSubscriptionTier(storedTier as SubscriptionTier);
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const saveUser = useCallback(async (userData: User, token?: string) => {
-    await updateProfileMutation.mutateAsync({
-      fullName: userData.fullName,
-      phone: userData.phone,
-    });
-  }, [updateProfileMutation]);
+    setUser(userData);
+    await AsyncStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    
+    if (token) {
+      setAuthToken(token);
+      await AsyncStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token);
+    }
+  }, []);
 
   const logout = useCallback(async () => {
-    utils.auth.me.reset();
-    utils.organizations.list.reset();
-  }, [utils]);
+    setUser(null);
+    setAuthToken(null);
+    await Promise.all([
+      AsyncStorage.removeItem(USER_STORAGE_KEY),
+      AsyncStorage.removeItem(AUTH_TOKEN_STORAGE_KEY),
+    ]);
+  }, []);
 
   const createDemoUser = useCallback(async (role: UserRole = 'seller_admin', organizationId?: string) => {
     console.log('Creating demo user with role:', role);
@@ -150,8 +149,10 @@ export const [UserProvider, useUser] = createContextHook(() => {
       organizationId,
       createdAt: new Date().toISOString(),
     };
+    
+    await saveUser(demoUser);
     return demoUser;
-  }, []);
+  }, [saveUser]);
 
   const setUserRole = useCallback(async (role: UserRole) => {
     if (!user) {
@@ -159,27 +160,34 @@ export const [UserProvider, useUser] = createContextHook(() => {
       const demoUser = await createDemoUser(role);
       return demoUser;
     }
-    console.log('Updating user role to:', role);
-    await updateProfileMutation.mutateAsync({
-      role,
-    });
-    return { ...user, role };
-  }, [user, createDemoUser, updateProfileMutation]);
+    
+    const updatedUser = { ...user, role };
+    await saveUser(updatedUser);
+    console.log('✅ User role updated to:', role);
+    return updatedUser;
+  }, [user, createDemoUser, saveUser]);
 
   const addOrganization = useCallback(async (org: Organization) => {
-    await createOrganizationMutation.mutateAsync(org);
-  }, [createOrganizationMutation]);
+    const updated = [...organizations, org];
+    setOrganizations(updated);
+    await AsyncStorage.setItem(ORGANIZATIONS_STORAGE_KEY, JSON.stringify(updated));
+  }, [organizations]);
 
   const updateOrganization = useCallback(async (orgId: string, updates: Partial<Organization>) => {
-    await updateOrganizationMutation.mutateAsync({ id: orgId, ...updates });
-  }, [updateOrganizationMutation]);
+    const updated = organizations.map((o) => (o.id === orgId ? { ...o, ...updates } : o));
+    setOrganizations(updated);
+    await AsyncStorage.setItem(ORGANIZATIONS_STORAGE_KEY, JSON.stringify(updated));
+  }, [organizations]);
 
   const deleteOrganization = useCallback(async (orgId: string) => {
-    await deleteOrganizationMutation.mutateAsync({ id: orgId });
-  }, [deleteOrganizationMutation]);
+    const updated = organizations.filter((o) => o.id !== orgId);
+    setOrganizations(updated);
+    await AsyncStorage.setItem(ORGANIZATIONS_STORAGE_KEY, JSON.stringify(updated));
+  }, [organizations]);
 
   const updateSubscriptionTier = useCallback(async (tier: SubscriptionTier) => {
-    console.log('Subscription tier update not yet implemented in backend');
+    setSubscriptionTier(tier);
+    await AsyncStorage.setItem(SUBSCRIPTION_TIER_STORAGE_KEY, tier);
   }, []);
 
   const permissions = useMemo<Permission>(() => {
