@@ -6,7 +6,7 @@ EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 # IMPORTANTE: Configura esta URL con tu base de datos de Supabase o PostgreSQL
 # Ejemplo Supabase: postgresql://postgres:[PASSWORD]@[PROJECT-REF].supabase.co:5432/postgres
 # Si no tienes base de datos, el backend funcionará en modo limitado
-DATABASE_URL=""
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/eventos_app?schema=public"
 
 # JWT Secret - Valor seguro generado
 JWT_SECRET="rork-eventos-app-jwt-secret-92loqsix46yuo4fa4rjne-secure-key-2025"
