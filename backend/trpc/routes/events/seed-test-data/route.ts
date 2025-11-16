@@ -490,117 +490,109 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
       ],
     });
 
+    const attendeesData = [
+      { eventId: event1.id, fullName: "Juan Pérez García", email: "juan.perez@empresa.com", employeeNumber: "EMP001", ticketCode: "TECH2025-001" },
+      { eventId: event1.id, fullName: "María González López", email: "maria.gonzalez@empresa.com", employeeNumber: "EMP002", ticketCode: "TECH2025-002", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event1.id, fullName: "Carlos Rodríguez Martínez", email: "carlos.rodriguez@empresa.com", employeeNumber: "EMP003", ticketCode: "TECH2025-003" },
+      { eventId: event1.id, fullName: "Laura Martínez Soto", email: "laura.martinez@empresa.com", employeeNumber: "EMP004", ticketCode: "TECH2025-004", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event1.id, fullName: "Pedro Hernández Cruz", email: "pedro.hernandez@empresa.com", employeeNumber: "EMP005", ticketCode: "TECH2025-005" },
+      { eventId: event1.id, fullName: "Ana Sofía López", email: "ana.lopez@empresa.com", employeeNumber: "EMP006", ticketCode: "TECH2025-006", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event1.id, fullName: "Miguel Ángel Ramírez", email: "miguel.ramirez@empresa.com", employeeNumber: "EMP007", ticketCode: "TECH2025-007" },
+      { eventId: event1.id, fullName: "Carmen Patricia Flores", email: "carmen.flores@empresa.com", employeeNumber: "EMP008", ticketCode: "TECH2025-008", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event1.id, fullName: "José Luis García", email: "jose.garcia@empresa.com", employeeNumber: "EMP009", ticketCode: "TECH2025-009" },
+      { eventId: event1.id, fullName: "Diana Alejandra Ruiz", email: "diana.ruiz@empresa.com", employeeNumber: "EMP010", ticketCode: "TECH2025-010", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event1.id, fullName: "Roberto Carlos Vega", email: "roberto.vega@empresa.com", employeeNumber: "EMP011", ticketCode: "TECH2025-011" },
+      { eventId: event1.id, fullName: "Gabriela Méndez Ramos", email: "gabriela.mendez@empresa.com", employeeNumber: "EMP012", ticketCode: "TECH2025-012", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event1.id, fullName: "Fernando Sánchez Díaz", email: "fernando.sanchez@empresa.com", employeeNumber: "EMP013", ticketCode: "TECH2025-013" },
+      { eventId: event1.id, fullName: "Valeria Torres Morales", email: "valeria.torres@empresa.com", employeeNumber: "EMP014", ticketCode: "TECH2025-014" },
+      { eventId: event1.id, fullName: "Alejandro Castro Luna", email: "alejandro.castro@empresa.com", employeeNumber: "EMP015", ticketCode: "TECH2025-015", checkedIn: true, checkedInAt: new Date() },
+
+      { eventId: event2.id, fullName: "Ana María Fernández", email: "ana.fernandez@email.com", employeeNumber: "FAN001", ticketCode: "FEST2025-001" },
+      { eventId: event2.id, fullName: "Roberto Silva Torres", email: "roberto.silva@email.com", employeeNumber: "FAN002", ticketCode: "FEST2025-002", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Mónica López Gutiérrez", email: "monica.lopez@email.com", employeeNumber: "FAN003", ticketCode: "FEST2025-003", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Daniel Ortiz Mendoza", email: "daniel.ortiz@email.com", employeeNumber: "FAN004", ticketCode: "FEST2025-004" },
+      { eventId: event2.id, fullName: "Sandra Jiménez Rojas", email: "sandra.jimenez@email.com", employeeNumber: "FAN005", ticketCode: "FEST2025-005", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Ricardo Moreno Pérez", email: "ricardo.moreno@email.com", employeeNumber: "FAN006", ticketCode: "FEST2025-006" },
+      { eventId: event2.id, fullName: "Claudia Vargas Soto", email: "claudia.vargas@email.com", employeeNumber: "FAN007", ticketCode: "FEST2025-007", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Jorge Alberto Reyes", email: "jorge.reyes@email.com", employeeNumber: "FAN008", ticketCode: "FEST2025-008" },
+      { eventId: event2.id, fullName: "Mariana Castro Villa", email: "mariana.castro@email.com", employeeNumber: "FAN009", ticketCode: "FEST2025-009", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Arturo Navarro Cruz", email: "arturo.navarro@email.com", employeeNumber: "FAN010", ticketCode: "FEST2025-010" },
+      { eventId: event2.id, fullName: "Paola Ramírez Fernández", email: "paola.ramirez@email.com", employeeNumber: "FAN011", ticketCode: "FEST2025-011", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Eduardo Martínez Luna", email: "eduardo.martinez@email.com", employeeNumber: "FAN012", ticketCode: "FEST2025-012" },
+      { eventId: event2.id, fullName: "Lucía González Ruiz", email: "lucia.gonzalez@email.com", employeeNumber: "FAN013", ticketCode: "FEST2025-013", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Andrés Herrera Díaz", email: "andres.herrera@email.com", employeeNumber: "FAN014", ticketCode: "FEST2025-014" },
+      { eventId: event2.id, fullName: "Isabel Flores Santos", email: "isabel.flores@email.com", employeeNumber: "FAN015", ticketCode: "FEST2025-015", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Rafael Torres Gómez", email: "rafael.torres@email.com", employeeNumber: "FAN016", ticketCode: "FEST2025-016" },
+      { eventId: event2.id, fullName: "Carolina Méndez Rivas", email: "carolina.mendez@email.com", employeeNumber: "FAN017", ticketCode: "FEST2025-017", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Manuel Sánchez Vega", email: "manuel.sanchez@email.com", employeeNumber: "FAN018", ticketCode: "FEST2025-018" },
+      { eventId: event2.id, fullName: "Fernanda López Castro", email: "fernanda.lopez@email.com", employeeNumber: "FAN019", ticketCode: "FEST2025-019", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event2.id, fullName: "Rodrigo García Morales", email: "rodrigo.garcia@email.com", employeeNumber: "FAN020", ticketCode: "FEST2025-020" },
+
+      { eventId: event3.id, fullName: "Patricia Ramírez Sánchez", email: "patricia.ramirez@corporativo.com", employeeNumber: "CORP001", ticketCode: "GALA2025-001" },
+      { eventId: event3.id, fullName: "Carlos Alberto Mendoza", email: "carlos.mendoza@corporativo.com", employeeNumber: "CORP002", ticketCode: "GALA2025-002", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event3.id, fullName: "Verónica Silva Ortiz", email: "veronica.silva@corporativo.com", employeeNumber: "CORP003", ticketCode: "GALA2025-003" },
+      { eventId: event3.id, fullName: "Francisco Javier López", email: "francisco.lopez@corporativo.com", employeeNumber: "CORP004", ticketCode: "GALA2025-004", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event3.id, fullName: "Adriana González Pérez", email: "adriana.gonzalez@corporativo.com", employeeNumber: "CORP005", ticketCode: "GALA2025-005" },
+      { eventId: event3.id, fullName: "Mauricio Hernández Ruiz", email: "mauricio.hernandez@corporativo.com", employeeNumber: "CORP006", ticketCode: "GALA2025-006", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event3.id, fullName: "Natalia Vargas Moreno", email: "natalia.vargas@corporativo.com", employeeNumber: "CORP007", ticketCode: "GALA2025-007" },
+      { eventId: event3.id, fullName: "Héctor Ramírez Díaz", email: "hector.ramirez@corporativo.com", employeeNumber: "CORP008", ticketCode: "GALA2025-008" },
+
+      { eventId: event4.id, fullName: "Diego Torres", email: "diego@dev.com", employeeNumber: "HACK001", ticketCode: "HACK2025-001" },
+      { eventId: event4.id, fullName: "Sofía Méndez", email: "sofia@dev.com", employeeNumber: "HACK002", ticketCode: "HACK2025-002", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event4.id, fullName: "Leonardo García", email: "leonardo@dev.com", employeeNumber: "HACK003", ticketCode: "HACK2025-003", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event4.id, fullName: "Camila Rodríguez", email: "camila@dev.com", employeeNumber: "HACK004", ticketCode: "HACK2025-004" },
+      { eventId: event4.id, fullName: "Sebastián Martínez", email: "sebastian@dev.com", employeeNumber: "HACK005", ticketCode: "HACK2025-005", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event4.id, fullName: "Valentina López", email: "valentina@dev.com", employeeNumber: "HACK006", ticketCode: "HACK2025-006" },
+      { eventId: event4.id, fullName: "Mateo Fernández", email: "mateo@dev.com", employeeNumber: "HACK007", ticketCode: "HACK2025-007", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event4.id, fullName: "Isabella Sánchez", email: "isabella@dev.com", employeeNumber: "HACK008", ticketCode: "HACK2025-008" },
+      { eventId: event4.id, fullName: "Santiago Pérez", email: "santiago@dev.com", employeeNumber: "HACK009", ticketCode: "HACK2025-009", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event4.id, fullName: "Luciana Torres", email: "luciana@dev.com", employeeNumber: "HACK010", ticketCode: "HACK2025-010" },
+      { eventId: event4.id, fullName: "Emiliano Ruiz", email: "emiliano@dev.com", employeeNumber: "HACK011", ticketCode: "HACK2025-011", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event4.id, fullName: "Martina Castro", email: "martina@dev.com", employeeNumber: "HACK012", ticketCode: "HACK2025-012" },
+
+      { eventId: event5.id, fullName: "Luis Ramírez", email: "luis@rock.com", employeeNumber: "ROCK001", ticketCode: "ROCK2025-001" },
+      { eventId: event5.id, fullName: "Carmen Vega", email: "carmen@rock.com", employeeNumber: "ROCK002", ticketCode: "ROCK2025-002" },
+      { eventId: event5.id, fullName: "David Morales", email: "david@rock.com", employeeNumber: "ROCK003", ticketCode: "ROCK2025-003", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event5.id, fullName: "Patricia Luna", email: "patricia@rock.com", employeeNumber: "ROCK004", ticketCode: "ROCK2025-004" },
+      { eventId: event5.id, fullName: "Alberto Guzmán", email: "alberto@rock.com", employeeNumber: "ROCK005", ticketCode: "ROCK2025-005", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event5.id, fullName: "Rosa María Delgado", email: "rosa@rock.com", employeeNumber: "ROCK006", ticketCode: "ROCK2025-006" },
+      { eventId: event5.id, fullName: "Javier Cortés", email: "javier@rock.com", employeeNumber: "ROCK007", ticketCode: "ROCK2025-007", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event5.id, fullName: "Elena Romero", email: "elena@rock.com", employeeNumber: "ROCK008", ticketCode: "ROCK2025-008" },
+      { eventId: event5.id, fullName: "Óscar Herrera", email: "oscar@rock.com", employeeNumber: "ROCK009", ticketCode: "ROCK2025-009", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event5.id, fullName: "Beatriz Campos", email: "beatriz@rock.com", employeeNumber: "ROCK010", ticketCode: "ROCK2025-010" },
+
+      { eventId: event6.id, fullName: "Roberto Sánchez", email: "roberto@empresa.com", employeeNumber: "CEO001", ticketCode: "LEAD2025-001", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event6.id, fullName: "Elena Martínez", email: "elena@empresa.com", employeeNumber: "CEO002", ticketCode: "LEAD2025-002" },
+      { eventId: event6.id, fullName: "Guillermo Ramos", email: "guillermo@empresa.com", employeeNumber: "CEO003", ticketCode: "LEAD2025-003", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event6.id, fullName: "Silvia Reyes", email: "silvia@empresa.com", employeeNumber: "CEO004", ticketCode: "LEAD2025-004" },
+      { eventId: event6.id, fullName: "Tomás Villa", email: "tomas@empresa.com", employeeNumber: "CEO005", ticketCode: "LEAD2025-005", checkedIn: true, checkedInAt: new Date() },
+
+      { eventId: event7.id, fullName: "Alejandro Cruz", email: "alex@bmx.com", employeeNumber: "BMX001", ticketCode: "BMX2025-001" },
+      { eventId: event7.id, fullName: "Kevin Morales", email: "kevin@bmx.com", employeeNumber: "BMX002", ticketCode: "BMX2025-002", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event7.id, fullName: "Bryan Hernández", email: "bryan@bmx.com", employeeNumber: "BMX003", ticketCode: "BMX2025-003" },
+      { eventId: event7.id, fullName: "Alan Jiménez", email: "alan@bmx.com", employeeNumber: "BMX004", ticketCode: "BMX2025-004", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event7.id, fullName: "César López", email: "cesar@bmx.com", employeeNumber: "BMX005", ticketCode: "BMX2025-005" },
+      { eventId: event7.id, fullName: "Marco Ramírez", email: "marco@bmx.com", employeeNumber: "BMX006", ticketCode: "BMX2025-006", checkedIn: true, checkedInAt: new Date() },
+
+      { eventId: event8.id, fullName: "Valeria Morales", email: "vale@music.com", employeeNumber: "EDM001", ticketCode: "SUNRISE2025-001" },
+      { eventId: event8.id, fullName: "Fernando López", email: "fer@music.com", employeeNumber: "EDM002", ticketCode: "SUNRISE2025-002", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Andrea Soto", email: "andrea@music.com", employeeNumber: "EDM003", ticketCode: "SUNRISE2025-003", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Bruno García", email: "bruno@music.com", employeeNumber: "EDM004", ticketCode: "SUNRISE2025-004" },
+      { eventId: event8.id, fullName: "Daniela Ruiz", email: "daniela@music.com", employeeNumber: "EDM005", ticketCode: "SUNRISE2025-005", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Cristian Méndez", email: "cristian@music.com", employeeNumber: "EDM006", ticketCode: "SUNRISE2025-006" },
+      { eventId: event8.id, fullName: "Paulina Castro", email: "paulina@music.com", employeeNumber: "EDM007", ticketCode: "SUNRISE2025-007", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Erick Torres", email: "erick@music.com", employeeNumber: "EDM008", ticketCode: "SUNRISE2025-008" },
+      { eventId: event8.id, fullName: "Mariana Flores", email: "mariana@music.com", employeeNumber: "EDM009", ticketCode: "SUNRISE2025-009", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Iván Navarro", email: "ivan@music.com", employeeNumber: "EDM010", ticketCode: "SUNRISE2025-010" },
+      { eventId: event8.id, fullName: "Ximena Ortiz", email: "ximena@music.com", employeeNumber: "EDM011", ticketCode: "SUNRISE2025-011", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Gabriel Vargas", email: "gabriel@music.com", employeeNumber: "EDM012", ticketCode: "SUNRISE2025-012" },
+      { eventId: event8.id, fullName: "Sofía Ramírez", email: "sofia.r@music.com", employeeNumber: "EDM013", ticketCode: "SUNRISE2025-013", checkedIn: true, checkedInAt: new Date() },
+      { eventId: event8.id, fullName: "Axel González", email: "axel@music.com", employeeNumber: "EDM014", ticketCode: "SUNRISE2025-014" },
+      { eventId: event8.id, fullName: "Renata Silva", email: "renata@music.com", employeeNumber: "EDM015", ticketCode: "SUNRISE2025-015", checkedIn: true, checkedInAt: new Date() },
+    ];
+
     await prisma.attendee.createMany({
-      data: [
-        {
-          eventId: event1.id,
-          fullName: "Juan Pérez García",
-          email: "juan.perez@empresa.com",
-          employeeNumber: "EMP001",
-          ticketCode: "TECH2025-001",
-        },
-        {
-          eventId: event1.id,
-          fullName: "María González López",
-          email: "maria.gonzalez@empresa.com",
-          employeeNumber: "EMP002",
-          ticketCode: "TECH2025-002",
-          checkedIn: true,
-          checkedInAt: new Date(),
-        },
-        {
-          eventId: event1.id,
-          fullName: "Carlos Rodríguez Martínez",
-          email: "carlos.rodriguez@empresa.com",
-          employeeNumber: "EMP003",
-          ticketCode: "TECH2025-003",
-        },
-        {
-          eventId: event2.id,
-          fullName: "Ana María Fernández",
-          email: "ana.fernandez@email.com",
-          employeeNumber: "FAN001",
-          ticketCode: "FEST2025-001",
-        },
-        {
-          eventId: event2.id,
-          fullName: "Roberto Silva Torres",
-          email: "roberto.silva@email.com",
-          employeeNumber: "FAN002",
-          ticketCode: "FEST2025-002",
-          checkedIn: true,
-          checkedInAt: new Date(),
-        },
-        {
-          eventId: event3.id,
-          fullName: "Patricia Ramírez Sánchez",
-          email: "patricia.ramirez@corporativo.com",
-          employeeNumber: "CORP001",
-          ticketCode: "GALA2025-001",
-        },
-        {
-          eventId: event4.id,
-          fullName: "Diego Torres",
-          email: "diego@dev.com",
-          employeeNumber: "HACK001",
-          ticketCode: "HACK2025-001",
-        },
-        {
-          eventId: event4.id,
-          fullName: "Sofía Méndez",
-          email: "sofia@dev.com",
-          employeeNumber: "HACK002",
-          ticketCode: "HACK2025-002",
-          checkedIn: true,
-          checkedInAt: new Date(),
-        },
-        {
-          eventId: event5.id,
-          fullName: "Luis Ramírez",
-          email: "luis@rock.com",
-          employeeNumber: "ROCK001",
-          ticketCode: "ROCK2025-001",
-        },
-        {
-          eventId: event5.id,
-          fullName: "Carmen Vega",
-          email: "carmen@rock.com",
-          employeeNumber: "ROCK002",
-          ticketCode: "ROCK2025-002",
-        },
-        {
-          eventId: event6.id,
-          fullName: "Roberto Sánchez",
-          email: "roberto@empresa.com",
-          employeeNumber: "CEO001",
-          ticketCode: "LEAD2025-001",
-          checkedIn: true,
-          checkedInAt: new Date(),
-        },
-        {
-          eventId: event7.id,
-          fullName: "Alejandro Cruz",
-          email: "alex@bmx.com",
-          employeeNumber: "BMX001",
-          ticketCode: "BMX2025-001",
-        },
-        {
-          eventId: event8.id,
-          fullName: "Valeria Morales",
-          email: "vale@music.com",
-          employeeNumber: "EDM001",
-          ticketCode: "SUNRISE2025-001",
-        },
-        {
-          eventId: event8.id,
-          fullName: "Fernando López",
-          email: "fer@music.com",
-          employeeNumber: "EDM002",
-          ticketCode: "SUNRISE2025-002",
-          checkedIn: true,
-          checkedInAt: new Date(),
-        },
-      ],
+      data: attendeesData,
     });
 
     await prisma.prize.createMany({
@@ -694,12 +686,21 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
 
     console.log("✅ Comprehensive test data seeded successfully");
     console.log(`📊 Created 4 organizations`);
-    console.log(`🎉 Created 8 events with tickets, attendees, and prizes`);
+    console.log(`🎉 Created 8 events with tickets, ${attendeesData.length} attendees, and prizes`);
     console.log(`\n🏪 Stores created:`);
     console.log(`   - /store/techevents-global (TechEvents Global - 3 eventos)`);
     console.log(`   - /store/live-music-pro (Live Music Productions - 3 eventos)`);
     console.log(`   - /store/elite-business (Elite Business Events - 2 eventos)`);
     console.log(`   - /store/deportes-extremos (Deportes Extremos MX - 1 evento)`);
+    console.log(`\n📝 Summary:`);
+    console.log(`   - Event 1: ${attendeesData.filter(a => a.eventId === event1.id).length} asistentes`);
+    console.log(`   - Event 2: ${attendeesData.filter(a => a.eventId === event2.id).length} asistentes`);
+    console.log(`   - Event 3: ${attendeesData.filter(a => a.eventId === event3.id).length} asistentes`);
+    console.log(`   - Event 4: ${attendeesData.filter(a => a.eventId === event4.id).length} asistentes`);
+    console.log(`   - Event 5: ${attendeesData.filter(a => a.eventId === event5.id).length} asistentes`);
+    console.log(`   - Event 6: ${attendeesData.filter(a => a.eventId === event6.id).length} asistentes`);
+    console.log(`   - Event 7: ${attendeesData.filter(a => a.eventId === event7.id).length} asistentes`);
+    console.log(`   - Event 8: ${attendeesData.filter(a => a.eventId === event8.id).length} asistentes`);
 
     return {
       success: true,
