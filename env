@@ -3,11 +3,13 @@ EXPO_PUBLIC_RORK_API_BASE_URL="https://dev-92loqsix46yuo4fa4rjne.rorktest.dev"
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
 # Base de datos PostgreSQL
-# Configura esta URL con tu base de datos real
-DATABASE_URL="postgresql://eventos_user:tu_password_seguro@localhost:5432/eventos_app?schema=public"
+# IMPORTANTE: Configura esta URL con tu base de datos de Supabase o PostgreSQL
+# Ejemplo Supabase: postgresql://postgres:[PASSWORD]@[PROJECT-REF].supabase.co:5432/postgres
+# Si no tienes base de datos, el backend funcionará en modo limitado
+DATABASE_URL=""
 
-# JWT Secret (genera uno seguro con: openssl rand -base64 32)
-JWT_SECRET="cambia-esto-por-un-secreto-seguro-en-produccion"
+# JWT Secret - Valor seguro generado
+JWT_SECRET="rork-eventos-app-jwt-secret-92loqsix46yuo4fa4rjne-secure-key-2025"
 
 # Configuración del servidor
 PORT=8081

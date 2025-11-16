@@ -91,4 +91,15 @@ app.notFound((c) => {
   return c.json({ error: 'Not found' }, 404);
 });
 
-export default app;
+const port = process.env.PORT || 8081;
+
+const server = Bun.serve({
+  port: Number(port),
+  fetch: app.fetch,
+});
+
+console.log(`🚀 Server running on http://localhost:${port}`);
+console.log(`🔌 API endpoint: http://localhost:${port}/api`);
+console.log(`📡 tRPC endpoint: http://localhost:${port}/api/trpc`);
+
+export default server;
