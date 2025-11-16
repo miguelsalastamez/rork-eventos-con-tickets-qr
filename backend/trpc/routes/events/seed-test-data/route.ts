@@ -684,23 +684,32 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
       ],
     });
 
+    const event1Count = attendeesData.filter(a => a.eventId === event1.id).length;
+    const event2Count = attendeesData.filter(a => a.eventId === event2.id).length;
+    const event3Count = attendeesData.filter(a => a.eventId === event3.id).length;
+    const event4Count = attendeesData.filter(a => a.eventId === event4.id).length;
+    const event5Count = attendeesData.filter(a => a.eventId === event5.id).length;
+    const event6Count = attendeesData.filter(a => a.eventId === event6.id).length;
+    const event7Count = attendeesData.filter(a => a.eventId === event7.id).length;
+    const event8Count = attendeesData.filter(a => a.eventId === event8.id).length;
+
     console.log("✅ Comprehensive test data seeded successfully");
-    console.log(`📊 Created 4 organizations`);
-    console.log(`🎉 Created 8 events with tickets, ${attendeesData.length} attendees, and prizes`);
-    console.log(`\n🏪 Stores created:`);
-    console.log(`   - /store/techevents-global (TechEvents Global - 3 eventos)`);
-    console.log(`   - /store/live-music-pro (Live Music Productions - 3 eventos)`);
-    console.log(`   - /store/elite-business (Elite Business Events - 2 eventos)`);
-    console.log(`   - /store/deportes-extremos (Deportes Extremos MX - 1 evento)`);
-    console.log(`\n📝 Summary:`);
-    console.log(`   - Event 1: ${attendeesData.filter(a => a.eventId === event1.id).length} asistentes`);
-    console.log(`   - Event 2: ${attendeesData.filter(a => a.eventId === event2.id).length} asistentes`);
-    console.log(`   - Event 3: ${attendeesData.filter(a => a.eventId === event3.id).length} asistentes`);
-    console.log(`   - Event 4: ${attendeesData.filter(a => a.eventId === event4.id).length} asistentes`);
-    console.log(`   - Event 5: ${attendeesData.filter(a => a.eventId === event5.id).length} asistentes`);
-    console.log(`   - Event 6: ${attendeesData.filter(a => a.eventId === event6.id).length} asistentes`);
-    console.log(`   - Event 7: ${attendeesData.filter(a => a.eventId === event7.id).length} asistentes`);
-    console.log(`   - Event 8: ${attendeesData.filter(a => a.eventId === event8.id).length} asistentes`);
+    console.log("📊 Created 4 organizations");
+    console.log("🎉 Created 8 events with tickets, " + attendeesData.length + " attendees, and prizes");
+    console.log("\n🏪 Stores created:");
+    console.log("   - /store/techevents-global (TechEvents Global - 3 eventos)");
+    console.log("   - /store/live-music-pro (Live Music Productions - 3 eventos)");
+    console.log("   - /store/elite-business (Elite Business Events - 2 eventos)");
+    console.log("   - /store/deportes-extremos (Deportes Extremos MX - 1 evento)");
+    console.log("\n📝 Summary:");
+    console.log("   - Event 1: " + event1Count + " asistentes");
+    console.log("   - Event 2: " + event2Count + " asistentes");
+    console.log("   - Event 3: " + event3Count + " asistentes");
+    console.log("   - Event 4: " + event4Count + " asistentes");
+    console.log("   - Event 5: " + event5Count + " asistentes");
+    console.log("   - Event 6: " + event6Count + " asistentes");
+    console.log("   - Event 7: " + event7Count + " asistentes");
+    console.log("   - Event 8: " + event8Count + " asistentes");
 
     return {
       success: true,
