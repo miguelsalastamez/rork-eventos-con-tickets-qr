@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -7,27 +7,43 @@ import {
   TouchableOpacity,
   Image,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Plus, Ticket as TicketIcon, Edit3, Trash2, DollarSign, Calendar, Users, Lock } from 'lucide-react-native';
-import { useTickets } from '@/contexts/TicketContext';
+import { trpc } from '@/lib/trpc';
 import { useEvents } from '@/contexts/EventContext';
 import { useUser } from '@/contexts/UserContext';
 
 export default function TicketsManagementScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getEventTickets, deleteTicket, getEventCapacityPools } = useTickets();
   const { getEventById } = useEvents();
   const { canAccessFeature } = useUser();
 
   const event = getEventById(id);
-  const tickets = useMemo(() => getEventTickets(id), [getEventTickets, id]);
-  const capacityPools = useMemo(() => getEventCapacityPools(id), [getEventCapacityPools, id]);
   const hasTicketsAccess = canAccessFeature('hasEmailSupport');
-
   const primaryColor = event?.primaryColor || '#6366f1';
+
+  const ticketsQuery = trpc.tickets.list.useQuery({ eventId: id || '' }, {
+    enabled: !!id && hasTicketsAccess,
+  });
+
+  const capacityPoolsQuery = trpc.capacityPools.list.useQuery({ eventId: id || '' }, {
+    enabled: !!id && hasTicketsAccess,
+  });
+
+  const deleteTicketMutation = trpc.tickets.delete.useMutation({
+    onSuccess: () => {
+      ticketsQuery.refetch();
+      capacityPoolsQuery.refetch();
+    },
+  });
+
+  const tickets = ticketsQuery.data || [];
+  const capacityPools = capacityPoolsQuery.data || [];
+  const isLoading = ticketsQuery.isLoading || capacityPoolsQuery.isLoading;
 
   if (!hasTicketsAccess) {
     return (
@@ -65,8 +81,8 @@ export default function TicketsManagementScreen() {
         {
           text: 'Eliminar',
           style: 'destructive',
-          onPress: async () => {
-            await deleteTicket(ticketId);
+          onPress: () => {
+            deleteTicketMutation.mutate({ id: ticketId });
           },
         },
       ]
@@ -98,6 +114,17 @@ export default function TicketsManagementScreen() {
     const end = new Date(ticket.saleEndDate);
     return now >= start && now <= end && ticket.isActive;
   };
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={primaryColor} />
+          <Text style={styles.loadingText}>Cargando tickets...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
@@ -461,6 +488,17 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: 16,
     fontWeight: '500' as const,
+    color: '#6b7280',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 40,
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 16,
     color: '#6b7280',
   },
 });
