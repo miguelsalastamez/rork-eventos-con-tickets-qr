@@ -3,10 +3,61 @@ import { prisma } from "@/backend/lib/prisma";
 
 export const seedTestDataProcedure = protectedProcedure.mutation(
   async ({ ctx }) => {
-    console.log("Seeding test data...");
+    console.log("🌱 Seeding comprehensive test data...");
 
     const userId = ctx.user.id;
-    const organizationId = ctx.user.organizationId;
+
+    const org1 = await prisma.organization.create({
+      data: {
+        name: "TechEvents Global",
+        slug: "techevents-global",
+        description: "Líder mundial en conferencias de tecnología y eventos de innovación digital",
+        logoUrl: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200",
+        coverUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200",
+        website: "https://techevents.global",
+        contactEmail: "info@techevents.global",
+        contactPhone: "+52 55 1234 5678",
+      },
+    });
+
+    const org2 = await prisma.organization.create({
+      data: {
+        name: "Live Music Productions",
+        slug: "live-music-pro",
+        description: "Organizadores de los mejores festivales y conciertos de México",
+        logoUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=200",
+        coverUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=1200",
+        website: "https://livemusicpro.mx",
+        contactEmail: "contacto@livemusicpro.mx",
+        contactPhone: "+52 55 8765 4321",
+      },
+    });
+
+    const org3 = await prisma.organization.create({
+      data: {
+        name: "Elite Business Events",
+        slug: "elite-business",
+        description: "Eventos corporativos de alto nivel y networking empresarial exclusivo",
+        logoUrl: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200",
+        coverUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=1200",
+        website: "https://elitebusiness.mx",
+        contactEmail: "eventos@elitebusiness.mx",
+        contactPhone: "+52 55 9988 7766",
+      },
+    });
+
+    const org4 = await prisma.organization.create({
+      data: {
+        name: "Deportes Extremos MX",
+        slug: "deportes-extremos",
+        description: "Organizadores de competencias y eventos de deportes extremos",
+        logoUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=200",
+        coverUrl: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=1200",
+        website: "https://deportesextremosmx.com",
+        contactEmail: "info@deportesextremosmx.com",
+        contactPhone: "+52 55 5544 3322",
+      },
+    });
 
     const event1 = await prisma.event.create({
       data: {
@@ -17,7 +68,7 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         venueName: "Centro de Convenciones CDMX",
         location: "Av. Paseo de la Reforma 476, Cuauhtémoc, CDMX",
         imageUrl: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800",
-        organizerLogoUrl: "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=200",
+        organizerLogoUrl: org1.logoUrl,
         venuePlanUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800",
         employeeNumberLabel: "Número de Empleado",
         successSoundId: "success-1",
@@ -28,7 +79,7 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         secondaryColor: "#3b82f6",
         accentColor: "#60a5fa",
         createdBy: userId,
-        organizationId: organizationId,
+        organizationId: org1.id,
       },
     });
 
@@ -41,7 +92,7 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         venueName: "Foro Sol",
         location: "Viaducto Río de la Piedad s/n, Granjas México, CDMX",
         imageUrl: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800",
-        organizerLogoUrl: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=200",
+        organizerLogoUrl: org2.logoUrl,
         venuePlanUrl: "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=800",
         employeeNumberLabel: "ID de Acceso",
         successSoundId: "success-2",
@@ -52,7 +103,7 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         secondaryColor: "#ef4444",
         accentColor: "#f87171",
         createdBy: userId,
-        organizationId: organizationId,
+        organizationId: org2.id,
       },
     });
 
@@ -65,7 +116,7 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         venueName: "Hotel Four Seasons",
         location: "Paseo de la Reforma 500, Juárez, CDMX",
         imageUrl: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800",
-        organizerLogoUrl: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200",
+        organizerLogoUrl: org3.logoUrl,
         venuePlanUrl: "https://images.unsplash.com/photo-1519167758481-83f29da8a803?w=800",
         employeeNumberLabel: "Código de Invitación",
         successSoundId: "success-1",
@@ -76,7 +127,127 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         secondaryColor: "#8b5cf6",
         accentColor: "#a78bfa",
         createdBy: userId,
-        organizationId: organizationId,
+        organizationId: org3.id,
+      },
+    });
+
+    const event4 = await prisma.event.create({
+      data: {
+        name: "Hackathon Innovation 2025",
+        description: "48 horas de código intensivo. Desarrolladores de todo el país compitiendo por premios de más de $500,000 MXN.",
+        date: new Date("2025-09-05T18:00:00Z"),
+        time: "06:00 PM",
+        venueName: "Campus Tecnológico",
+        location: "Av. Universidad 3000, Copilco Universidad, CDMX",
+        imageUrl: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
+        organizerLogoUrl: org1.logoUrl,
+        venuePlanUrl: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+        employeeNumberLabel: "Código de Equipo",
+        successSoundId: "success-1",
+        errorSoundId: "error-1",
+        vibrationEnabled: true,
+        vibrationIntensity: "heavy",
+        primaryColor: "#059669",
+        secondaryColor: "#10b981",
+        accentColor: "#34d399",
+        createdBy: userId,
+        organizationId: org1.id,
+      },
+    });
+
+    const event5 = await prisma.event.create({
+      data: {
+        name: "Rock en Español Festival",
+        description: "Las mejores bandas de rock en español en un solo lugar. Una noche épica de rock y energía.",
+        date: new Date("2025-10-12T19:00:00Z"),
+        time: "07:00 PM",
+        venueName: "Palacio de los Deportes",
+        location: "Añil 635, Granjas México, Iztacalco, CDMX",
+        imageUrl: "https://images.unsplash.com/photo-1501612780327-45045538702b?w=800",
+        organizerLogoUrl: org2.logoUrl,
+        venuePlanUrl: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=800",
+        employeeNumberLabel: "Pulsera ID",
+        successSoundId: "success-2",
+        errorSoundId: "error-1",
+        vibrationEnabled: true,
+        vibrationIntensity: "heavy",
+        primaryColor: "#ea580c",
+        secondaryColor: "#f97316",
+        accentColor: "#fb923c",
+        createdBy: userId,
+        organizationId: org2.id,
+      },
+    });
+
+    const event6 = await prisma.event.create({
+      data: {
+        name: "Cumbre de Liderazgo Empresarial",
+        description: "Los CEOs más influyentes de México comparten sus estrategias de éxito. Networking exclusivo y casos de estudio.",
+        date: new Date("2025-11-20T08:00:00Z"),
+        time: "08:00 AM",
+        venueName: "World Trade Center México",
+        location: "Montecito 38, Nápoles, Benito Juárez, CDMX",
+        imageUrl: "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=800",
+        organizerLogoUrl: org3.logoUrl,
+        venuePlanUrl: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800",
+        employeeNumberLabel: "Badge ID",
+        successSoundId: "success-1",
+        errorSoundId: "error-2",
+        vibrationEnabled: false,
+        vibrationIntensity: "light",
+        primaryColor: "#0891b2",
+        secondaryColor: "#06b6d4",
+        accentColor: "#22d3ee",
+        createdBy: userId,
+        organizationId: org3.id,
+      },
+    });
+
+    const event7 = await prisma.event.create({
+      data: {
+        name: "Campeonato Nacional de BMX",
+        description: "Los mejores riders de BMX de México compiten por el título nacional. Acrobacias, velocidad y adrenalina pura.",
+        date: new Date("2025-07-28T10:00:00Z"),
+        time: "10:00 AM",
+        venueName: "Parque Extremo Del Valle",
+        location: "Av. División del Norte 3000, Del Valle, CDMX",
+        imageUrl: "https://images.unsplash.com/photo-1530549387789-4c1017266635?w=800",
+        organizerLogoUrl: org4.logoUrl,
+        venuePlanUrl: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800",
+        employeeNumberLabel: "Número de Competidor",
+        successSoundId: "success-1",
+        errorSoundId: "error-1",
+        vibrationEnabled: true,
+        vibrationIntensity: "heavy",
+        primaryColor: "#eab308",
+        secondaryColor: "#facc15",
+        accentColor: "#fde047",
+        createdBy: userId,
+        organizationId: org4.id,
+      },
+    });
+
+    const event8 = await prisma.event.create({
+      data: {
+        name: "Festival Electrónico Sunrise",
+        description: "Los mejores DJs internacionales en una experiencia musical única. Arte visual, luces y la mejor música electrónica.",
+        date: new Date("2025-12-31T22:00:00Z"),
+        time: "10:00 PM",
+        venueName: "Autódromo Hermanos Rodríguez",
+        location: "Granjas México, Iztacalco, CDMX",
+        imageUrl: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800",
+        organizerLogoUrl: org2.logoUrl,
+        venuePlanUrl: "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=800",
+        employeeNumberLabel: "Wristband ID",
+        successSoundId: "success-2",
+        errorSoundId: "error-1",
+        vibrationEnabled: true,
+        vibrationIntensity: "medium",
+        primaryColor: "#8b5cf6",
+        secondaryColor: "#a78bfa",
+        accentColor: "#c4b5fd",
+        createdBy: userId,
+        organizationId: org2.id,
       },
     });
 
@@ -94,6 +265,24 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
         eventId: event2.id,
         name: "Pool General Festival",
         totalCapacity: 1000,
+        usedCapacity: 0,
+      },
+    });
+
+    const pool4 = await prisma.capacityPool.create({
+      data: {
+        eventId: event4.id,
+        name: "Pool Hackathon",
+        totalCapacity: 300,
+        usedCapacity: 0,
+      },
+    });
+
+    const pool5 = await prisma.capacityPool.create({
+      data: {
+        eventId: event5.id,
+        name: "Pool Rock Festival",
+        totalCapacity: 2000,
         usedCapacity: 0,
       },
     });
@@ -129,9 +318,6 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
           saleStartDate: new Date("2025-01-01"),
           saleEndDate: new Date("2025-06-14"),
           isActive: true,
-          formFields: JSON.stringify([
-            { label: "Nombre Completo", type: "text", required: true },
-          ]),
         },
         {
           eventId: event2.id,
@@ -185,6 +371,122 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
           saleEndDate: new Date("2025-08-09"),
           isActive: true,
         },
+        {
+          eventId: event4.id,
+          name: "Registro Individual",
+          description: "Registro individual para participar en el hackathon",
+          imageUrl: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=400",
+          price: 500,
+          currency: "MXN",
+          capacityType: "shared",
+          sharedCapacityPoolId: pool4.id,
+          saleStartDate: new Date("2025-01-01"),
+          saleEndDate: new Date("2025-09-04"),
+          isActive: true,
+        },
+        {
+          eventId: event4.id,
+          name: "Equipo Completo (4 personas)",
+          description: "Registro de equipo completo con workspace dedicado",
+          imageUrl: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=400",
+          price: 1800,
+          currency: "MXN",
+          capacityType: "dedicated",
+          dedicatedCapacity: 75,
+          saleStartDate: new Date("2025-01-01"),
+          saleEndDate: new Date("2025-09-04"),
+          isActive: true,
+        },
+        {
+          eventId: event5.id,
+          name: "General Admission",
+          description: "Entrada general al festival",
+          imageUrl: "https://images.unsplash.com/photo-1506157786151-b8491531f063?w=400",
+          price: 1200,
+          currency: "MXN",
+          capacityType: "shared",
+          sharedCapacityPoolId: pool5.id,
+          saleStartDate: new Date("2025-03-01"),
+          saleEndDate: new Date("2025-10-11"),
+          isActive: true,
+        },
+        {
+          eventId: event5.id,
+          name: "VIP Golden Circle",
+          description: "Zona preferente cerca del escenario",
+          imageUrl: "https://images.unsplash.com/photo-1524368535928-5b5e00ddc76b?w=400",
+          price: 3500,
+          currency: "MXN",
+          capacityType: "dedicated",
+          dedicatedCapacity: 200,
+          saleStartDate: new Date("2025-03-01"),
+          saleEndDate: new Date("2025-10-11"),
+          isActive: true,
+        },
+        {
+          eventId: event6.id,
+          name: "Entrada Individual",
+          description: "Acceso individual a la cumbre",
+          imageUrl: "https://images.unsplash.com/photo-1511578314322-379afb476865?w=400",
+          price: 8000,
+          currency: "MXN",
+          capacityType: "dedicated",
+          dedicatedCapacity: 100,
+          saleStartDate: new Date("2025-04-01"),
+          saleEndDate: new Date("2025-11-19"),
+          isActive: true,
+        },
+        {
+          eventId: event7.id,
+          name: "Entrada Espectador",
+          description: "Acceso para ver las competencias",
+          imageUrl: "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=400",
+          price: 300,
+          currency: "MXN",
+          capacityType: "unlimited",
+          saleStartDate: new Date("2025-02-01"),
+          saleEndDate: new Date("2025-07-27"),
+          isActive: true,
+        },
+        {
+          eventId: event7.id,
+          name: "Registro Competidor",
+          description: "Registro oficial para competidores",
+          imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+          price: 1500,
+          currency: "MXN",
+          capacityType: "dedicated",
+          dedicatedCapacity: 50,
+          saleStartDate: new Date("2025-02-01"),
+          saleEndDate: new Date("2025-07-20"),
+          isActive: true,
+        },
+        {
+          eventId: event8.id,
+          name: "Early Bird",
+          description: "Precio especial de preventa",
+          imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400",
+          price: 1800,
+          currency: "MXN",
+          capacityType: "dedicated",
+          dedicatedCapacity: 500,
+          saleStartDate: new Date("2025-05-01"),
+          saleEndDate: new Date("2025-09-01"),
+          isActive: true,
+        },
+        {
+          eventId: event8.id,
+          name: "VIP Experience",
+          description: "Acceso VIP con área exclusiva y bebidas premium",
+          imageUrl: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400",
+          price: 5500,
+          currency: "MXN",
+          capacityType: "dedicated",
+          dedicatedCapacity: 150,
+          saleStartDate: new Date("2025-05-01"),
+          saleEndDate: new Date("2025-12-30"),
+          isActive: true,
+        },
       ],
     });
 
@@ -236,6 +538,68 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
           employeeNumber: "CORP001",
           ticketCode: "GALA2025-001",
         },
+        {
+          eventId: event4.id,
+          fullName: "Diego Torres",
+          email: "diego@dev.com",
+          employeeNumber: "HACK001",
+          ticketCode: "HACK2025-001",
+        },
+        {
+          eventId: event4.id,
+          fullName: "Sofía Méndez",
+          email: "sofia@dev.com",
+          employeeNumber: "HACK002",
+          ticketCode: "HACK2025-002",
+          checkedIn: true,
+          checkedInAt: new Date(),
+        },
+        {
+          eventId: event5.id,
+          fullName: "Luis Ramírez",
+          email: "luis@rock.com",
+          employeeNumber: "ROCK001",
+          ticketCode: "ROCK2025-001",
+        },
+        {
+          eventId: event5.id,
+          fullName: "Carmen Vega",
+          email: "carmen@rock.com",
+          employeeNumber: "ROCK002",
+          ticketCode: "ROCK2025-002",
+        },
+        {
+          eventId: event6.id,
+          fullName: "Roberto Sánchez",
+          email: "roberto@empresa.com",
+          employeeNumber: "CEO001",
+          ticketCode: "LEAD2025-001",
+          checkedIn: true,
+          checkedInAt: new Date(),
+        },
+        {
+          eventId: event7.id,
+          fullName: "Alejandro Cruz",
+          email: "alex@bmx.com",
+          employeeNumber: "BMX001",
+          ticketCode: "BMX2025-001",
+        },
+        {
+          eventId: event8.id,
+          fullName: "Valeria Morales",
+          email: "vale@music.com",
+          employeeNumber: "EDM001",
+          ticketCode: "SUNRISE2025-001",
+        },
+        {
+          eventId: event8.id,
+          fullName: "Fernando López",
+          email: "fer@music.com",
+          employeeNumber: "EDM002",
+          ticketCode: "SUNRISE2025-002",
+          checkedIn: true,
+          checkedInAt: new Date(),
+        },
       ],
     });
 
@@ -283,15 +647,64 @@ export const seedTestDataProcedure = protectedProcedure.mutation(
           imageUrl: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=400",
           quantity: 1,
         },
+        {
+          eventId: event4.id,
+          name: "Premio al Mejor Proyecto",
+          description: "$250,000 MXN + Mentoría con inversores",
+          imageUrl: "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=400",
+          quantity: 1,
+        },
+        {
+          eventId: event4.id,
+          name: "Premio Innovación Social",
+          description: "$100,000 MXN + Incubación por 6 meses",
+          imageUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998?w=400",
+          quantity: 1,
+        },
+        {
+          eventId: event5.id,
+          name: "Guitarra Fender Stratocaster Firmada",
+          description: "Firmada por todos los artistas del festival",
+          imageUrl: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=400",
+          quantity: 1,
+        },
+        {
+          eventId: event5.id,
+          name: "Pases Backstage",
+          description: "Acceso backstage y meet & greet",
+          imageUrl: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400",
+          quantity: 5,
+        },
+        {
+          eventId: event7.id,
+          name: "Bicicleta BMX Profesional",
+          description: "BMX de competición profesional completa",
+          imageUrl: "https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?w=400",
+          quantity: 1,
+        },
+        {
+          eventId: event8.id,
+          name: "Pase VIP Anual",
+          description: "Acceso VIP a todos los festivales del año",
+          imageUrl: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400",
+          quantity: 2,
+        },
       ],
     });
 
-    console.log("Test data seeded successfully");
-    console.log(`Created 3 events with tickets, attendees, and prizes`);
+    console.log("✅ Comprehensive test data seeded successfully");
+    console.log(`📊 Created 4 organizations`);
+    console.log(`🎉 Created 8 events with tickets, attendees, and prizes`);
+    console.log(`\n🏪 Stores created:`);
+    console.log(`   - /store/techevents-global (TechEvents Global - 3 eventos)`);
+    console.log(`   - /store/live-music-pro (Live Music Productions - 3 eventos)`);
+    console.log(`   - /store/elite-business (Elite Business Events - 2 eventos)`);
+    console.log(`   - /store/deportes-extremos (Deportes Extremos MX - 1 evento)`);
 
     return {
       success: true,
-      events: [event1, event2, event3],
+      organizations: [org1, org2, org3, org4],
+      events: [event1, event2, event3, event4, event5, event6, event7, event8],
     };
   }
 );
