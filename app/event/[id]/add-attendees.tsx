@@ -10,10 +10,11 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { UserPlus, FileSpreadsheet, Mail, Phone, IdCard, User, Upload, FileText } from 'lucide-react-native';
+import { UserPlus, FileSpreadsheet, Mail, Phone, IdCard, User, Upload, FileText, ChevronDown, Check, X } from 'lucide-react-native';
 import { useEvents } from '@/contexts/EventContext';
 import { Attendee } from '@/types';
 import * as DocumentPicker from 'expo-document-picker';
@@ -38,23 +39,71 @@ export default function AddAttendeesScreen() {
   const [batchData, setBatchData] = useState('');
   const [uploadedFileName, setUploadedFileName] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showColumnMapper, setShowColumnMapper] = useState(false);
+  const [excelHeaders, setExcelHeaders] = useState<string[]>([]);
+  const [excelData, setExcelData] = useState<any[][]>([]);
+  const [columnMapping, setColumnMapping] = useState<{
+    name: number | null;
+    email: number | null;
+    phone: number | null;
+    employeeNumber: number | null;
+  }>({ name: null, email: null, phone: null, employeeNumber: null });
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
 
   const generateTicketCode = () => {
     return `${id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`.toUpperCase();
   };
 
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    if (!phone || phone.trim() === '') return true;
+    const digitsOnly = phone.replace(/\D/g, '');
+    return digitsOnly.length === 10;
+  };
+
+  const normalizePhone = (phone: string): string => {
+    return phone.replace(/\D/g, '');
+  };
+
   const handleAddManual = () => {
-    if (!fullName.trim() || !email.trim()) {
-      Alert.alert('Error', 'Nombre completo y email son requeridos');
+    setEmailError('');
+    setPhoneError('');
+
+    if (!fullName.trim()) {
+      Alert.alert('Error', 'El nombre completo es requerido');
       return;
     }
+
+    if (!email.trim()) {
+      Alert.alert('Error', 'El email es requerido');
+      return;
+    }
+
+    if (!validateEmail(email.trim())) {
+      setEmailError('Email inválido');
+      Alert.alert('Error', 'Por favor ingresa un email válido');
+      return;
+    }
+
+    if (phone.trim() && !validatePhone(phone.trim())) {
+      setPhoneError('El teléfono debe tener 10 dígitos');
+      Alert.alert('Error', 'El teléfono debe tener exactamente 10 dígitos');
+      return;
+    }
+
+    const normalizedPhone = phone.trim() ? normalizePhone(phone.trim()) : '';
 
     const attendee: Attendee = {
       id: Date.now().toString(),
       eventId: id,
       fullName: fullName.trim(),
-      email: email.trim(),
-      phone: phone.trim(),
+      email: email.trim().toLowerCase(),
+      phone: normalizedPhone,
       employeeNumber: employeeNumber.trim(),
       checkedIn: false,
       ticketCode: generateTicketCode(),
@@ -69,6 +118,8 @@ export default function AddAttendeesScreen() {
           setEmail('');
           setPhone('');
           setEmployeeNumber('');
+          setEmailError('');
+          setPhoneError('');
         },
       },
     ]);
@@ -131,95 +182,142 @@ export default function AddAttendeesScreen() {
         return;
       }
 
-      const headers = jsonData[0].map((h: any) => String(h).toLowerCase().trim());
+      const headers = jsonData[0].map((h: any) => String(h).trim());
       const dataRows = jsonData.slice(1);
 
       console.log('📊 Headers:', headers);
       console.log('📊 Data rows:', dataRows);
 
-      const attendees: Attendee[] = [];
-      const errors: string[] = [];
-
-      dataRows.forEach((row, index) => {
-        if (!row || row.every((cell: any) => !cell)) {
-          return;
-        }
-
-        const rowData: any = {};
-        headers.forEach((header: string, idx: number) => {
-          rowData[header] = row[idx];
-        });
-
-        const nameField = rowData['nombre completo'] || rowData['nombre'] || rowData['name'] || rowData['full name'] || row[0];
-        const emailField = rowData['email'] || rowData['correo'] || rowData['e-mail'] || row[1];
-        const phoneField = rowData['telefono'] || rowData['teléfono'] || rowData['phone'] || rowData['tel'] || row[2] || '';
-        const empNumField = rowData['numero de empleado'] || rowData['número de empleado'] || rowData['employee number'] || rowData['empleado'] || row[3] || '';
-
-        const name = nameField ? String(nameField).trim() : '';
-        const email = emailField ? String(emailField).trim() : '';
-        const phone = phoneField ? String(phoneField).trim() : '';
-        const empNum = empNumField ? String(empNumField).trim() : '';
-
-        if (!name || !email) {
-          errors.push(`Fila ${index + 2}: Nombre o email vacío`);
-          return;
-        }
-
-        attendees.push({
-          id: `${Date.now()}-${index}`,
-          eventId: id,
-          fullName: name,
-          email: email,
-          phone: phone,
-          employeeNumber: empNum,
-          checkedIn: false,
-          ticketCode: generateTicketCode(),
-        });
-      });
-
-      console.log('✅ Processed attendees:', attendees);
-      console.log('⚠️ Errors:', errors);
-
-      if (errors.length > 0) {
-        Alert.alert('Advertencias', errors.join('\n'), [
-          {
-            text: 'Cancelar',
-            style: 'cancel',
-          },
-          {
-            text: 'Continuar',
-            onPress: () => {
-              if (attendees.length > 0) {
-                addMultipleAttendees(attendees);
-                Alert.alert('Éxito', `${attendees.length} invitados agregados correctamente`, [
-                  { text: 'OK', onPress: () => router.back() },
-                ]);
-              } else {
-                Alert.alert('Error', 'No se pudieron procesar los datos');
-              }
-            },
-          },
-        ]);
-        setIsProcessing(false);
-        return;
-      }
-
-      if (attendees.length === 0) {
-        Alert.alert('Error', 'No se pudieron procesar los datos');
-        setIsProcessing(false);
-        return;
-      }
-
-      addMultipleAttendees(attendees);
-      Alert.alert('Éxito', `${attendees.length} invitados agregados correctamente`, [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      setExcelHeaders(headers);
+      setExcelData(dataRows);
+      
+      const detectedMapping = detectColumns(headers);
+      setColumnMapping(detectedMapping);
+      
+      setShowColumnMapper(true);
+      setIsProcessing(false);
     } catch (error) {
       console.error('❌ Error processing Excel file:', error);
       Alert.alert('Error', 'No se pudo procesar el archivo. Por favor verifica que sea un archivo Excel válido.');
-    } finally {
       setIsProcessing(false);
     }
+  };
+
+  const detectColumns = (headers: string[]): typeof columnMapping => {
+    const mapping: typeof columnMapping = {
+      name: null,
+      email: null,
+      phone: null,
+      employeeNumber: null,
+    };
+
+    headers.forEach((header, index) => {
+      const lowerHeader = header.toLowerCase();
+      
+      if (lowerHeader.includes('nombre') || lowerHeader.includes('name')) {
+        mapping.name = index;
+      } else if (lowerHeader.includes('email') || lowerHeader.includes('correo') || lowerHeader.includes('e-mail')) {
+        mapping.email = index;
+      } else if (lowerHeader.includes('telefono') || lowerHeader.includes('teléfono') || lowerHeader.includes('phone') || lowerHeader.includes('tel')) {
+        mapping.phone = index;
+      } else if (lowerHeader.includes('empleado') || lowerHeader.includes('employee')) {
+        mapping.employeeNumber = index;
+      }
+    });
+
+    return mapping;
+  };
+
+  const processExcelData = () => {
+    if (columnMapping.name === null || columnMapping.email === null) {
+      Alert.alert('Error', 'Debes seleccionar al menos las columnas de Nombre y Email');
+      return;
+    }
+
+    const attendees: Attendee[] = [];
+    const errors: string[] = [];
+
+    excelData.forEach((row, index) => {
+      if (!row || row.every((cell: any) => !cell)) {
+        return;
+      }
+
+      const name = columnMapping.name !== null && row[columnMapping.name] ? String(row[columnMapping.name]).trim() : '';
+      const email = columnMapping.email !== null && row[columnMapping.email] ? String(row[columnMapping.email]).trim() : '';
+      const phone = columnMapping.phone !== null && row[columnMapping.phone] ? String(row[columnMapping.phone]).trim() : '';
+      const empNum = columnMapping.employeeNumber !== null && row[columnMapping.employeeNumber] ? String(row[columnMapping.employeeNumber]).trim() : '';
+
+      if (!name) {
+        errors.push(`Fila ${index + 2}: Nombre vacío`);
+        return;
+      }
+
+      if (!email) {
+        errors.push(`Fila ${index + 2}: Email vacío`);
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        errors.push(`Fila ${index + 2}: Email inválido (${email})`);
+        return;
+      }
+
+      if (phone && !validatePhone(phone)) {
+        errors.push(`Fila ${index + 2}: Teléfono debe tener 10 dígitos (${phone})`);
+        return;
+      }
+
+      const normalizedPhone = phone ? normalizePhone(phone) : '';
+
+      attendees.push({
+        id: `${Date.now()}-${index}`,
+        eventId: id,
+        fullName: name,
+        email: email.toLowerCase(),
+        phone: normalizedPhone,
+        employeeNumber: empNum,
+        checkedIn: false,
+        ticketCode: generateTicketCode(),
+      });
+    });
+
+    console.log('✅ Processed attendees:', attendees);
+    console.log('⚠️ Errors:', errors);
+
+    if (errors.length > 0) {
+      Alert.alert('Errores de validación', errors.slice(0, 10).join('\n') + (errors.length > 10 ? `\n\n... y ${errors.length - 10} errores más` : ''), [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Continuar con válidos',
+          onPress: () => {
+            if (attendees.length > 0) {
+              addMultipleAttendees(attendees);
+              setShowColumnMapper(false);
+              Alert.alert('Éxito', `${attendees.length} invitados agregados correctamente\n${errors.length} filas omitidas por errores`, [
+                { text: 'OK', onPress: () => router.back() },
+              ]);
+            } else {
+              Alert.alert('Error', 'No se pudieron procesar los datos. Todos los registros tienen errores.');
+            }
+          },
+        },
+      ]);
+      return;
+    }
+
+    if (attendees.length === 0) {
+      Alert.alert('Error', 'No se pudieron procesar los datos');
+      return;
+    }
+
+    addMultipleAttendees(attendees);
+    setShowColumnMapper(false);
+    Alert.alert('Éxito', `${attendees.length} invitados agregados correctamente`, [
+      { text: 'OK', onPress: () => router.back() },
+    ]);
   };
 
   const handleAddBatch = () => {
@@ -242,17 +340,34 @@ export default function AddAttendeesScreen() {
 
       const [name, emailVal, phoneVal = '', empNum = ''] = columns;
 
-      if (!name?.trim() || !emailVal?.trim()) {
-        errors.push(`Línea ${index + 1}: Nombre o email vacío`);
+      if (!name?.trim()) {
+        errors.push(`Línea ${index + 1}: Nombre vacío`);
         return;
       }
+
+      if (!emailVal?.trim()) {
+        errors.push(`Línea ${index + 1}: Email vacío`);
+        return;
+      }
+
+      if (!validateEmail(emailVal.trim())) {
+        errors.push(`Línea ${index + 1}: Email inválido (${emailVal.trim()})`);
+        return;
+      }
+
+      if (phoneVal?.trim() && !validatePhone(phoneVal.trim())) {
+        errors.push(`Línea ${index + 1}: Teléfono debe tener 10 dígitos (${phoneVal.trim()})`);
+        return;
+      }
+
+      const normalizedPhone = phoneVal?.trim() ? normalizePhone(phoneVal.trim()) : '';
 
       attendees.push({
         id: `${Date.now()}-${index}`,
         eventId: id,
         fullName: name.trim(),
-        email: emailVal.trim(),
-        phone: phoneVal.trim(),
+        email: emailVal.trim().toLowerCase(),
+        phone: normalizedPhone,
         employeeNumber: empNum.trim(),
         checkedIn: false,
         ticketCode: generateTicketCode(),
@@ -260,7 +375,25 @@ export default function AddAttendeesScreen() {
     });
 
     if (errors.length > 0) {
-      Alert.alert('Errores encontrados', errors.join('\n'));
+      Alert.alert('Errores de validación', errors.slice(0, 10).join('\n') + (errors.length > 10 ? `\n\n... y ${errors.length - 10} errores más` : ''), [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Continuar con válidos',
+          onPress: () => {
+            if (attendees.length > 0) {
+              addMultipleAttendees(attendees);
+              Alert.alert('Éxito', `${attendees.length} invitados agregados correctamente\n${errors.length} líneas omitidas por errores`, [
+                { text: 'OK', onPress: () => router.back() },
+              ]);
+            } else {
+              Alert.alert('Error', 'No se pudieron procesar los datos. Todas las líneas tienen errores.');
+            }
+          },
+        },
+      ]);
       return;
     }
 
@@ -330,33 +463,43 @@ export default function AddAttendeesScreen() {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email *</Text>
-                <View style={styles.iconInputContainer}>
-                  <Mail color={primaryColor} size={20} />
+                <View style={[styles.iconInputContainer, emailError && styles.inputError]}>
+                  <Mail color={emailError ? '#ef4444' : primaryColor} size={20} />
                   <TextInput
                     style={styles.iconInput}
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={(text) => {
+                      setEmail(text);
+                      if (emailError) setEmailError('');
+                    }}
                     placeholder="juan@ejemplo.com"
                     placeholderTextColor="#9ca3af"
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
                 </View>
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Teléfono</Text>
-                <View style={styles.iconInputContainer}>
-                  <Phone color={primaryColor} size={20} />
+                <Text style={styles.label}>Teléfono (10 dígitos)</Text>
+                <View style={[styles.iconInputContainer, phoneError && styles.inputError]}>
+                  <Phone color={phoneError ? '#ef4444' : primaryColor} size={20} />
                   <TextInput
                     style={styles.iconInput}
                     value={phone}
-                    onChangeText={setPhone}
-                    placeholder="+52 123 456 7890"
+                    onChangeText={(text) => {
+                      setPhone(text);
+                      if (phoneError) setPhoneError('');
+                    }}
+                    placeholder="1234567890"
                     placeholderTextColor="#9ca3af"
                     keyboardType="phone-pad"
+                    maxLength={15}
                   />
                 </View>
+                {phoneError ? <Text style={styles.errorText}>{phoneError}</Text> : null}
+                <Text style={styles.helperText}>Solo números, 10 dígitos requeridos</Text>
               </View>
 
               <View style={styles.inputGroup}>
@@ -468,8 +611,161 @@ export default function AddAttendeesScreen() {
             </TouchableOpacity>
           </View>
         )}
+
+        <Modal
+          visible={showColumnMapper}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={() => setShowColumnMapper(false)}
+        >
+          <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top', 'bottom']}>
+            <View style={styles.modalHeader}>
+              <View>
+                <Text style={styles.modalTitle}>Mapear Columnas</Text>
+                <Text style={styles.modalSubtitle}>Selecciona qué columna corresponde a cada campo</Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowColumnMapper(false)}>
+                <X color={textColor} size={24} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.modalContent}>
+              <ColumnMapper
+                label="Nombre Completo *"
+                headers={excelHeaders}
+                selectedIndex={columnMapping.name}
+                onSelect={(index) => setColumnMapping({ ...columnMapping, name: index })}
+                primaryColor={primaryColor}
+                required
+              />
+
+              <ColumnMapper
+                label="Email *"
+                headers={excelHeaders}
+                selectedIndex={columnMapping.email}
+                onSelect={(index) => setColumnMapping({ ...columnMapping, email: index })}
+                primaryColor={primaryColor}
+                required
+              />
+
+              <ColumnMapper
+                label="Teléfono (10 dígitos)"
+                headers={excelHeaders}
+                selectedIndex={columnMapping.phone}
+                onSelect={(index) => setColumnMapping({ ...columnMapping, phone: index })}
+                primaryColor={primaryColor}
+              />
+
+              <ColumnMapper
+                label={event?.employeeNumberLabel || 'Número de Empleado'}
+                headers={excelHeaders}
+                selectedIndex={columnMapping.employeeNumber}
+                onSelect={(index) => setColumnMapping({ ...columnMapping, employeeNumber: index })}
+                primaryColor={primaryColor}
+              />
+
+              <View style={styles.previewCard}>
+                <Text style={styles.previewTitle}>Vista previa (primera fila)</Text>
+                {excelData[0] && (
+                  <View style={styles.previewContent}>
+                    <PreviewRow label="Nombre" value={columnMapping.name !== null ? excelData[0][columnMapping.name] : '-'} />
+                    <PreviewRow label="Email" value={columnMapping.email !== null ? excelData[0][columnMapping.email] : '-'} />
+                    <PreviewRow label="Teléfono" value={columnMapping.phone !== null ? excelData[0][columnMapping.phone] : '-'} />
+                    <PreviewRow label="Empleado" value={columnMapping.employeeNumber !== null ? excelData[0][columnMapping.employeeNumber] : '-'} />
+                  </View>
+                )}
+              </View>
+            </ScrollView>
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowColumnMapper(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.addButton, { backgroundColor: primaryColor }]}
+                onPress={processExcelData}
+              >
+                <Text style={styles.addButtonText}>Procesar Datos</Text>
+              </TouchableOpacity>
+            </View>
+          </SafeAreaView>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+
+function ColumnMapper({
+  label,
+  headers,
+  selectedIndex,
+  onSelect,
+  primaryColor,
+  required = false,
+}: {
+  label: string;
+  headers: string[];
+  selectedIndex: number | null;
+  onSelect: (index: number | null) => void;
+  primaryColor: string;
+  required?: boolean;
+}) {
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  return (
+    <View style={styles.mapperContainer}>
+      <Text style={styles.mapperLabel}>{label}</Text>
+      <TouchableOpacity
+        style={styles.mapperDropdown}
+        onPress={() => setShowDropdown(!showDropdown)}
+      >
+        <Text style={styles.mapperDropdownText}>
+          {selectedIndex !== null ? headers[selectedIndex] : 'No seleccionada'}
+        </Text>
+        <ChevronDown color="#6b7280" size={20} />
+      </TouchableOpacity>
+      {showDropdown && (
+        <View style={styles.dropdownMenu}>
+          {!required && (
+            <TouchableOpacity
+              style={styles.dropdownItem}
+              onPress={() => {
+                onSelect(null);
+                setShowDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>No usar esta columna</Text>
+              {selectedIndex === null && <Check color={primaryColor} size={18} />}
+            </TouchableOpacity>
+          )}
+          {headers.map((header, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.dropdownItem}
+              onPress={() => {
+                onSelect(index);
+                setShowDropdown(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>{header}</Text>
+              {selectedIndex === index && <Check color={primaryColor} size={18} />}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </View>
+  );
+}
+
+function PreviewRow({ label, value }: { label: string; value: any }) {
+  return (
+    <View style={styles.previewRow}>
+      <Text style={styles.previewLabel}>{label}:</Text>
+      <Text style={styles.previewValue}>{value ? String(value) : '-'}</Text>
+    </View>
   );
 }
 
@@ -642,5 +938,128 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500' as const,
     color: '#065f46',
+  },
+  inputError: {
+    borderColor: '#ef4444',
+    borderWidth: 2,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#ef4444',
+    marginTop: 4,
+  },
+  helperText: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginTop: 4,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    backgroundColor: '#fff',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: '#111827',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 4,
+  },
+  modalContent: {
+    flex: 1,
+    padding: 20,
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 20,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e5e7eb',
+  },
+  mapperContainer: {
+    marginBottom: 24,
+  },
+  mapperLabel: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#111827',
+    marginBottom: 8,
+  },
+  mapperDropdown: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  mapperDropdownText: {
+    fontSize: 16,
+    color: '#111827',
+  },
+  dropdownMenu: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 12,
+    marginTop: 8,
+    maxHeight: 200,
+    overflow: 'scroll' as const,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  dropdownItemText: {
+    fontSize: 15,
+    color: '#374151',
+  },
+  previewCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 24,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+  },
+  previewTitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#111827',
+    marginBottom: 12,
+  },
+  previewContent: {
+    gap: 8,
+  },
+  previewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  previewLabel: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: '#6b7280',
+    width: 100,
+  },
+  previewValue: {
+    flex: 1,
+    fontSize: 14,
+    color: '#111827',
   },
 });
