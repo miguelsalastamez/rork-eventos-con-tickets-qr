@@ -212,19 +212,20 @@ export default function AddAttendeesScreen() {
     };
 
     headers.forEach((header, index) => {
-      const lowerHeader = header.toLowerCase();
+      const lowerHeader = header.toLowerCase().trim();
       
-      if (lowerHeader.includes('nombre') || lowerHeader.includes('name')) {
+      if (!mapping.name && (lowerHeader.includes('nombre') || lowerHeader.includes('name') || lowerHeader === 'nombre' || lowerHeader === 'name')) {
         mapping.name = index;
-      } else if (lowerHeader.includes('email') || lowerHeader.includes('correo') || lowerHeader.includes('e-mail')) {
+      } else if (!mapping.email && (lowerHeader.includes('email') || lowerHeader.includes('correo') || lowerHeader.includes('e-mail') || lowerHeader.includes('mail') || lowerHeader === 'email' || lowerHeader === 'correo')) {
         mapping.email = index;
-      } else if (lowerHeader.includes('telefono') || lowerHeader.includes('teléfono') || lowerHeader.includes('phone') || lowerHeader.includes('tel')) {
+      } else if (!mapping.phone && (lowerHeader.includes('telefono') || lowerHeader.includes('teléfono') || lowerHeader.includes('phone') || lowerHeader.includes('tel') || lowerHeader.includes('celular') || lowerHeader.includes('movil') || lowerHeader.includes('móvil') || lowerHeader === 'telefono' || lowerHeader === 'teléfono' || lowerHeader === 'tel' || lowerHeader === 'phone')) {
         mapping.phone = index;
-      } else if (lowerHeader.includes('empleado') || lowerHeader.includes('employee')) {
+      } else if (!mapping.employeeNumber && (lowerHeader.includes('empleado') || lowerHeader.includes('employee') || lowerHeader.includes('emp') || lowerHeader.includes('num') || lowerHeader.includes('número') || lowerHeader.includes('numero') || lowerHeader === 'empleado' || lowerHeader === 'employee')) {
         mapping.employeeNumber = index;
       }
     });
 
+    console.log('📊 Detected column mapping:', mapping);
     return mapping;
   };
 
@@ -637,6 +638,7 @@ export default function AddAttendeesScreen() {
                 onSelect={(index) => setColumnMapping({ ...columnMapping, name: index })}
                 primaryColor={primaryColor}
                 required
+                exampleData={excelData[0] || []}
               />
 
               <ColumnMapper
@@ -646,6 +648,7 @@ export default function AddAttendeesScreen() {
                 onSelect={(index) => setColumnMapping({ ...columnMapping, email: index })}
                 primaryColor={primaryColor}
                 required
+                exampleData={excelData[0] || []}
               />
 
               <ColumnMapper
@@ -654,6 +657,7 @@ export default function AddAttendeesScreen() {
                 selectedIndex={columnMapping.phone}
                 onSelect={(index) => setColumnMapping({ ...columnMapping, phone: index })}
                 primaryColor={primaryColor}
+                exampleData={excelData[0] || []}
               />
 
               <ColumnMapper
@@ -662,18 +666,23 @@ export default function AddAttendeesScreen() {
                 selectedIndex={columnMapping.employeeNumber}
                 onSelect={(index) => setColumnMapping({ ...columnMapping, employeeNumber: index })}
                 primaryColor={primaryColor}
+                exampleData={excelData[0] || []}
               />
 
               <View style={styles.previewCard}>
-                <Text style={styles.previewTitle}>Vista previa (primera fila)</Text>
-                {excelData[0] && (
-                  <View style={styles.previewContent}>
-                    <PreviewRow label="Nombre" value={columnMapping.name !== null ? excelData[0][columnMapping.name] : '-'} />
-                    <PreviewRow label="Email" value={columnMapping.email !== null ? excelData[0][columnMapping.email] : '-'} />
-                    <PreviewRow label="Teléfono" value={columnMapping.phone !== null ? excelData[0][columnMapping.phone] : '-'} />
-                    <PreviewRow label="Empleado" value={columnMapping.employeeNumber !== null ? excelData[0][columnMapping.employeeNumber] : '-'} />
+                <Text style={styles.previewTitle}>Vista previa</Text>
+                <Text style={styles.previewSubtitle}>Primeras 3 filas del archivo</Text>
+                {excelData.slice(0, 3).map((row, rowIndex) => (
+                  <View key={rowIndex} style={styles.previewRowContainer}>
+                    <Text style={styles.previewRowTitle}>Fila {rowIndex + 1}</Text>
+                    <View style={styles.previewContent}>
+                      <PreviewRow label="Nombre" value={columnMapping.name !== null ? row[columnMapping.name] : '-'} />
+                      <PreviewRow label="Email" value={columnMapping.email !== null ? row[columnMapping.email] : '-'} />
+                      <PreviewRow label="Teléfono" value={columnMapping.phone !== null ? row[columnMapping.phone] : '-'} />
+                      <PreviewRow label="Empleado" value={columnMapping.employeeNumber !== null ? row[columnMapping.employeeNumber] : '-'} />
+                    </View>
                   </View>
-                )}
+                ))}
               </View>
             </ScrollView>
 
@@ -705,6 +714,7 @@ function ColumnMapper({
   onSelect,
   primaryColor,
   required = false,
+  exampleData = [],
 }: {
   label: string;
   headers: string[];
@@ -712,20 +722,28 @@ function ColumnMapper({
   onSelect: (index: number | null) => void;
   primaryColor: string;
   required?: boolean;
+  exampleData?: any[];
 }) {
   const [showDropdown, setShowDropdown] = useState(false);
+  const selectedHeader = selectedIndex !== null ? headers[selectedIndex] : 'No seleccionada';
+  const exampleValue = selectedIndex !== null && exampleData.length > 0 ? exampleData[selectedIndex] : null;
 
   return (
     <View style={styles.mapperContainer}>
       <Text style={styles.mapperLabel}>{label}</Text>
       <TouchableOpacity
-        style={styles.mapperDropdown}
+        style={[styles.mapperDropdown, selectedIndex !== null && { borderColor: primaryColor, borderWidth: 2 }]}
         onPress={() => setShowDropdown(!showDropdown)}
       >
-        <Text style={styles.mapperDropdownText}>
-          {selectedIndex !== null ? headers[selectedIndex] : 'No seleccionada'}
-        </Text>
-        <ChevronDown color="#6b7280" size={20} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.mapperDropdownText}>{selectedHeader}</Text>
+          {exampleValue && (
+            <Text style={styles.mapperExampleText} numberOfLines={1}>
+              Ejemplo: {String(exampleValue)}
+            </Text>
+          )}
+        </View>
+        <ChevronDown color={selectedIndex !== null ? primaryColor : "#6b7280"} size={20} />
       </TouchableOpacity>
       {showDropdown && (
         <View style={styles.dropdownMenu}>
@@ -741,19 +759,29 @@ function ColumnMapper({
               {selectedIndex === null && <Check color={primaryColor} size={18} />}
             </TouchableOpacity>
           )}
-          {headers.map((header, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.dropdownItem}
-              onPress={() => {
-                onSelect(index);
-                setShowDropdown(false);
-              }}
-            >
-              <Text style={styles.dropdownItemText}>{header}</Text>
-              {selectedIndex === index && <Check color={primaryColor} size={18} />}
-            </TouchableOpacity>
-          ))}
+          {headers.map((header, index) => {
+            const example = exampleData.length > 0 ? exampleData[index] : null;
+            return (
+              <TouchableOpacity
+                key={index}
+                style={styles.dropdownItem}
+                onPress={() => {
+                  onSelect(index);
+                  setShowDropdown(false);
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.dropdownItemText}>{header}</Text>
+                  {example && (
+                    <Text style={styles.dropdownItemExample} numberOfLines={1}>
+                      Ej: {String(example)}
+                    </Text>
+                  )}
+                </View>
+                {selectedIndex === index && <Check color={primaryColor} size={18} />}
+              </TouchableOpacity>
+            );
+          })}
         </View>
       )}
     </View>
@@ -1007,6 +1035,12 @@ const styles = StyleSheet.create({
   mapperDropdownText: {
     fontSize: 16,
     color: '#111827',
+    fontWeight: '500' as const,
+  },
+  mapperExampleText: {
+    fontSize: 13,
+    color: '#6b7280',
+    marginTop: 4,
   },
   dropdownMenu: {
     backgroundColor: '#fff',
@@ -1029,6 +1063,12 @@ const styles = StyleSheet.create({
   dropdownItemText: {
     fontSize: 15,
     color: '#374151',
+    fontWeight: '500' as const,
+  },
+  dropdownItemExample: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
   },
   previewCard: {
     backgroundColor: '#fff',
@@ -1042,7 +1082,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: '#111827',
+    marginBottom: 4,
+  },
+  previewSubtitle: {
+    fontSize: 13,
+    color: '#6b7280',
     marginBottom: 12,
+  },
+  previewRowContainer: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  previewRowTitle: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#6b7280',
+    marginBottom: 8,
   },
   previewContent: {
     gap: 8,
