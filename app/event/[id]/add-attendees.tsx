@@ -27,7 +27,6 @@ export default function AddAttendeesScreen() {
   const event = getEventById(id);
 
   const primaryColor = event?.primaryColor || '#6366f1';
-  const secondaryColor = event?.secondaryColor || '#8b5cf6';
   const backgroundColor = event?.backgroundColor || '#f9fafb';
   const textColor = event?.textColor || '#111827';
 
@@ -169,24 +168,49 @@ export default function AddAttendeesScreen() {
       }
 
       console.log('📊 Parsing Excel file...');
-      const workbook = XLSX.read(fileData, { type: 'array' });
+      const workbook = XLSX.read(fileData, { type: 'array', cellDates: true, cellNF: false, cellText: false });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+      
+      const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+      console.log('📊 Sheet range:', range);
+      
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+        header: 1, 
+        defval: '', 
+        blankrows: false,
+        raw: false 
+      }) as any[][];
 
-      console.log('📊 Parsed data:', jsonData);
+      console.log('📊 Raw parsed data:', jsonData);
+      console.log('📊 Data length:', jsonData.length);
 
       if (jsonData.length < 2) {
-        Alert.alert('Error', 'El archivo está vacío o no tiene datos');
+        Alert.alert('Error', 'El archivo está vacío o no tiene suficientes datos. Asegúrate de que la primera fila contenga los encabezados y las siguientes filas contengan los datos.');
         setIsProcessing(false);
         return;
       }
 
-      const headers = jsonData[0].map((h: any) => String(h).trim());
-      const dataRows = jsonData.slice(1);
+      const headers = jsonData[0]
+        .map((h: any) => {
+          if (h === null || h === undefined) return '';
+          return String(h).trim();
+        })
+        .filter((h: string) => h !== '');
+      
+      if (headers.length === 0) {
+        Alert.alert('Error', 'No se encontraron encabezados válidos en la primera fila del archivo.');
+        setIsProcessing(false);
+        return;
+      }
+      
+      const dataRows = jsonData.slice(1).filter(row => {
+        return row && row.some((cell: any) => cell !== null && cell !== undefined && String(cell).trim() !== '');
+      });
 
       console.log('📊 Headers:', headers);
-      console.log('📊 Data rows:', dataRows);
+      console.log('📊 Data rows count:', dataRows.length);
+      console.log('📊 First data row:', dataRows[0]);
 
       setExcelHeaders(headers);
       setExcelData(dataRows);
@@ -211,21 +235,72 @@ export default function AddAttendeesScreen() {
       employeeNumber: null,
     };
 
+    console.log('🔍 Detecting columns from headers:', headers);
+
     headers.forEach((header, index) => {
-      const lowerHeader = header.toLowerCase().trim();
+      if (!header) return;
       
-      if (!mapping.name && (lowerHeader.includes('nombre') || lowerHeader.includes('name') || lowerHeader === 'nombre' || lowerHeader === 'name')) {
+      const lowerHeader = header.toLowerCase().trim();
+      console.log(`🔍 Checking header [${index}]: "${header}" -> "${lowerHeader}"`);
+      
+      if (!mapping.name && (
+        lowerHeader === 'nombre' || 
+        lowerHeader === 'name' || 
+        lowerHeader === 'nombre completo' || 
+        lowerHeader === 'full name' ||
+        lowerHeader.includes('nombre') || 
+        lowerHeader.includes('name')
+      )) {
+        console.log(`✅ Detected NAME at index ${index}`);
         mapping.name = index;
-      } else if (!mapping.email && (lowerHeader.includes('email') || lowerHeader.includes('correo') || lowerHeader.includes('e-mail') || lowerHeader.includes('mail') || lowerHeader === 'email' || lowerHeader === 'correo')) {
+      } else if (!mapping.email && (
+        lowerHeader === 'email' || 
+        lowerHeader === 'correo' || 
+        lowerHeader === 'e-mail' || 
+        lowerHeader === 'mail' ||
+        lowerHeader === 'correo electrónico' ||
+        lowerHeader === 'correo electronico' ||
+        lowerHeader.includes('email') || 
+        lowerHeader.includes('correo') || 
+        lowerHeader.includes('mail')
+      )) {
+        console.log(`✅ Detected EMAIL at index ${index}`);
         mapping.email = index;
-      } else if (!mapping.phone && (lowerHeader.includes('telefono') || lowerHeader.includes('teléfono') || lowerHeader.includes('phone') || lowerHeader.includes('tel') || lowerHeader.includes('celular') || lowerHeader.includes('movil') || lowerHeader.includes('móvil') || lowerHeader === 'telefono' || lowerHeader === 'teléfono' || lowerHeader === 'tel' || lowerHeader === 'phone')) {
+      } else if (!mapping.phone && (
+        lowerHeader === 'telefono' || 
+        lowerHeader === 'teléfono' || 
+        lowerHeader === 'phone' || 
+        lowerHeader === 'tel' || 
+        lowerHeader === 'celular' || 
+        lowerHeader === 'movil' || 
+        lowerHeader === 'móvil' ||
+        lowerHeader.includes('telefono') || 
+        lowerHeader.includes('teléfono') || 
+        lowerHeader.includes('phone') || 
+        lowerHeader.includes('tel') || 
+        lowerHeader.includes('celular') || 
+        lowerHeader.includes('movil') || 
+        lowerHeader.includes('móvil')
+      )) {
+        console.log(`✅ Detected PHONE at index ${index}`);
         mapping.phone = index;
-      } else if (!mapping.employeeNumber && (lowerHeader.includes('empleado') || lowerHeader.includes('employee') || lowerHeader.includes('emp') || lowerHeader.includes('num') || lowerHeader.includes('número') || lowerHeader.includes('numero') || lowerHeader === 'empleado' || lowerHeader === 'employee')) {
+      } else if (!mapping.employeeNumber && (
+        lowerHeader === 'empleado' || 
+        lowerHeader === 'employee' || 
+        lowerHeader === 'emp' || 
+        lowerHeader === 'numero empleado' || 
+        lowerHeader === 'número empleado' ||
+        lowerHeader === 'employee number' ||
+        lowerHeader.includes('empleado') || 
+        lowerHeader.includes('employee') || 
+        (lowerHeader.includes('num') && lowerHeader.includes('emp'))
+      )) {
+        console.log(`✅ Detected EMPLOYEE NUMBER at index ${index}`);
         mapping.employeeNumber = index;
       }
     });
 
-    console.log('📊 Detected column mapping:', mapping);
+    console.log('📊 Final detected column mapping:', mapping);
     return mapping;
   };
 
@@ -239,14 +314,24 @@ export default function AddAttendeesScreen() {
     const errors: string[] = [];
 
     excelData.forEach((row, index) => {
-      if (!row || row.every((cell: any) => !cell)) {
+      if (!row || row.every((cell: any) => cell === null || cell === undefined || String(cell).trim() === '')) {
+        console.log(`⏭️ Skipping empty row ${index + 2}`);
         return;
       }
 
-      const name = columnMapping.name !== null && row[columnMapping.name] ? String(row[columnMapping.name]).trim() : '';
-      const email = columnMapping.email !== null && row[columnMapping.email] ? String(row[columnMapping.email]).trim() : '';
-      const phone = columnMapping.phone !== null && row[columnMapping.phone] ? String(row[columnMapping.phone]).trim() : '';
-      const empNum = columnMapping.employeeNumber !== null && row[columnMapping.employeeNumber] ? String(row[columnMapping.employeeNumber]).trim() : '';
+      const getCellValue = (colIndex: number | null): string => {
+        if (colIndex === null || !row[colIndex]) return '';
+        const val = row[colIndex];
+        if (val === null || val === undefined) return '';
+        return String(val).trim();
+      };
+
+      const name = getCellValue(columnMapping.name);
+      const email = getCellValue(columnMapping.email);
+      const phone = getCellValue(columnMapping.phone);
+      const empNum = getCellValue(columnMapping.employeeNumber);
+
+      console.log(`📋 Processing row ${index + 2}:`, { name, email, phone, empNum });
 
       if (!name) {
         errors.push(`Fila ${index + 2}: Nombre vacío`);
