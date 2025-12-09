@@ -3,7 +3,7 @@ EXPO_PUBLIC_RORK_API_BASE_URL="https://dev-92loqsix46yuo4fa4rjne.rorktest.dev"
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
 # Base de datos - Supabase PostgreSQL
-DATABASE_URL="postgresql://postgres:Bi0i19c3salas@db.qaiaigeskomvqvcvgobo.supabase.co:5432/postgres"
+DATABASE_URL="postgresql://postgres:Bi0i19c3salas@db.qaiaigeskomvqvcvgobo.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1"
 
 # JWT Secret - Valor seguro generado
 JWT_SECRET="rork-eventos-app-jwt-secret-92loqsix46yuo4fa4rjne-secure-key-2025"
