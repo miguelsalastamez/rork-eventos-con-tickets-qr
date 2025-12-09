@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { Event, Attendee, Prize, RaffleWinner } from '@/types';
 import { sampleEvents } from '@/mocks/sampleEvents';
+import { trpc } from '@/lib/trpc';
 
 const EVENTS_STORAGE_KEY = '@eventpass_events';
 const ATTENDEES_STORAGE_KEY = '@eventpass_attendees';
@@ -16,20 +17,31 @@ export const [EventProvider, useEvents] = createContextHook(() => {
   const [raffleWinners, setRaffleWinners] = useState<RaffleWinner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const createEventMutation = trpc.events.create.useMutation();
+  const eventsQuery = trpc.events.list.useQuery(undefined, {
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
   useEffect(() => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    if (eventsQuery.data) {
+      console.log('📚 Loaded events from database:', eventsQuery.data.length);
+      setEvents(eventsQuery.data as Event[]);
+    }
+  }, [eventsQuery.data]);
+
   const loadData = async () => {
     try {
-      const [storedEvents, storedAttendees, storedPrizes, storedWinners] = await Promise.all([
-        AsyncStorage.getItem(EVENTS_STORAGE_KEY),
+      const [storedAttendees, storedPrizes, storedWinners] = await Promise.all([
         AsyncStorage.getItem(ATTENDEES_STORAGE_KEY),
         AsyncStorage.getItem(PRIZES_STORAGE_KEY),
         AsyncStorage.getItem(RAFFLE_WINNERS_STORAGE_KEY),
       ]);
 
-      if (storedEvents) setEvents(JSON.parse(storedEvents));
       if (storedAttendees) setAttendees(JSON.parse(storedAttendees));
       if (storedPrizes) setPrizes(JSON.parse(storedPrizes));
       if (storedWinners) setRaffleWinners(JSON.parse(storedWinners));
@@ -40,13 +52,38 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     }
   };
 
-  const addEvent = useCallback(async (event: Event) => {
-    console.log('🎉 Adding event:', event);
-    const updatedEvents = [...events, event];
-    setEvents(updatedEvents);
-    await AsyncStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(updatedEvents));
-    console.log('✅ Event saved successfully');
-  }, [events]);
+  const addEvent = useCallback(async (event: Omit<Event, 'id' | 'createdAt'>) => {
+    console.log('🎉 Creating event in database:', event);
+    
+    try {
+      const result = await createEventMutation.mutateAsync({
+        name: event.name,
+        description: event.description,
+        date: event.date,
+        time: event.time,
+        venueName: event.venueName,
+        location: event.location,
+        imageUrl: event.imageUrl,
+        organizerLogoUrl: event.organizerLogoUrl,
+        venuePlanUrl: event.venuePlanUrl,
+        employeeNumberLabel: event.employeeNumberLabel,
+        successSoundId: event.successSoundId,
+        errorSoundId: event.errorSoundId,
+        vibrationEnabled: event.vibrationEnabled,
+        vibrationIntensity: event.vibrationIntensity,
+        primaryColor: event.primaryColor,
+        secondaryColor: event.secondaryColor,
+        organizationId: event.organizationId,
+      });
+      
+      console.log('✅ Event saved successfully to database:', result);
+      setEvents((prev) => [...prev, result as Event]);
+      return result;
+    } catch (error) {
+      console.error('❌ Failed to save event to database:', error);
+      throw error;
+    }
+  }, [createEventMutation]);
 
   const getOrganizationEvents = useCallback((organizationId: string) => {
     return events.filter((e) => e.organizationId === organizationId);
