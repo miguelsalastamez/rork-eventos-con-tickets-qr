@@ -1,20 +1,21 @@
+# Base de datos - Supabase PostgreSQL
+DATABASE_URL="postgresql://postgres:Bi0i19c3salas@db.qaiaigeskomvqvcvgobo.supabase.co:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres:Bi0i19c3salas@db.qaiaigeskomvqvcvgobo.supabase.co:5432/postgres"
+
+# JWT Secret
+JWT_SECRET="rork-secure-jwt-secret-2024-change-in-production"
+
 # URLs del servidor - Rork Platform
 EXPO_PUBLIC_RORK_API_BASE_URL="https://dev-92loqsix46yuo4fa4rjne.rorktest.dev"
 EXPO_PUBLIC_TOOLKIT_URL="https://toolkit.rork.com"
 
-# Base de datos - Supabase PostgreSQL
-DATABASE_URL="postgresql://postgres:Bi0i19c3salas@db.qaiaigeskomvqvcvgobo.supabase.co:5432/postgres"
-
-# JWT Secret - Valor seguro generado
-JWT_SECRET="rork-eventos-app-jwt-secret-92loqsix46yuo4fa4rjne-secure-key-2025"
+# IDs del proyecto
+EXPO_PUBLIC_PROJECT_ID="92loqsix46yuo4fa4rjne"
+EXPO_PUBLIC_TEAM_ID="e5845339-c03b-4808-8c82-58f1ed636591"
 
 # Configuración del servidor
 PORT=8081
-NODE_ENV=production
-
-# Stripe (opcional, para pagos con tarjeta)
-# STRIPE_SECRET_KEY="sk_test_..."
-# STRIPE_PUBLISHABLE_KEY="pk_test_..."
+NODE_ENV=development
 
 # Configuración de subida de archivos
 MAX_FILE_SIZE=10485760
