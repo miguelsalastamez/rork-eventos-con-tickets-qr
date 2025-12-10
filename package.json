@@ -3,9 +3,9 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-  "start": "bunx rork start -p 92loqsix46yuo4fa4rjne --tunnel",
-  "start-web": "bunx rork start -p 92loqsix46yuo4fa4rjne --web --tunnel",
-  "start-web-dev": "DEBUG=expo* bunx rork start -p 92loqsix46yuo4fa4rjne --web --tunnel",
+  "start": "npx rork start -p 92loqsix46yuo4fa4rjne --tunnel",
+  "start-web": "npx rork start -p 92loqsix46yuo4fa4rjne --web --tunnel",
+  "start-web-dev": "DEBUG=expo* npx rork start -p 92loqsix46yuo4fa4rjne --web --tunnel",
   "lint": "expo lint",
   "postinstall": "prisma generate"
 	},
