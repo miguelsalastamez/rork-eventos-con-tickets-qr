@@ -60,6 +60,7 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
       if (userCheckError || !existingUser) {
         console.log('⚠️ User not found in Supabase, creating...');
+        const now = new Date().toISOString();
         const { error: userInsertError } = await supabase
           .from('User')
           .upsert({
@@ -71,6 +72,7 @@ export const [EventProvider, useEvents] = createContextHook(() => {
             role: currentUser.role,
             organizationId: currentUser.organizationId,
             createdAt: currentUser.createdAt,
+            updatedAt: now,
           });
         
         if (userInsertError) {
