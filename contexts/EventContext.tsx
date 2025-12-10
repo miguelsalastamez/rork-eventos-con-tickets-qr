@@ -46,6 +46,8 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     try {
       const id = `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
+      const now = new Date().toISOString();
+      
       const eventData: any = {
         id,
         name: event.name,
@@ -60,6 +62,8 @@ export const [EventProvider, useEvents] = createContextHook(() => {
         vibrationEnabled: event.vibrationEnabled,
         vibrationIntensity: event.vibrationIntensity,
         createdBy: event.createdBy || 'demo-user',
+        createdAt: now,
+        updatedAt: now,
       };
 
       if (event.organizerLogoUrl) eventData.organizerLogoUrl = event.organizerLogoUrl;
