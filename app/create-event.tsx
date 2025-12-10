@@ -75,7 +75,6 @@ export default function CreateEventScreen() {
     }
 
     const event = {
-      id: Date.now().toString(),
       name: name.trim(),
       description: description.trim(),
       date: date.toISOString(),
@@ -91,7 +90,6 @@ export default function CreateEventScreen() {
       vibrationEnabled,
       vibrationIntensity,
       createdBy: user?.id || 'demo-user',
-      createdAt: new Date().toISOString(),
     };
 
     console.log('📦 Event object:', event);
@@ -109,11 +107,12 @@ export default function CreateEventScreen() {
         ]);
       }
     } catch (error) {
-      console.error('❌ Error creating event:', error);
+      const errorMessage = error instanceof Error ? error.message : 'No se pudo crear el evento';
+      console.error('❌ Error creating event:', errorMessage);
       if (isWeb) {
-        window.alert('No se pudo crear el evento');
+        window.alert(errorMessage);
       } else {
-        Alert.alert('Error', 'No se pudo crear el evento');
+        Alert.alert('Error', errorMessage);
       }
     }
   };

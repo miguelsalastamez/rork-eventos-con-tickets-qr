@@ -44,39 +44,48 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     console.log('🎉 Creating event in Supabase:', event);
     
     try {
+      const eventData: any = {
+        name: event.name,
+        description: event.description,
+        date: event.date,
+        time: event.time,
+        venueName: event.venueName,
+        location: event.location,
+        imageUrl: event.imageUrl,
+        successSoundId: event.successSoundId,
+        errorSoundId: event.errorSoundId,
+        vibrationEnabled: event.vibrationEnabled,
+        vibrationIntensity: event.vibrationIntensity,
+        createdBy: event.createdBy || 'demo-user',
+      };
+
+      if (event.organizerLogoUrl) eventData.organizerLogoUrl = event.organizerLogoUrl;
+      if (event.venuePlanUrl) eventData.venuePlanUrl = event.venuePlanUrl;
+      if (event.employeeNumberLabel) eventData.employeeNumberLabel = event.employeeNumberLabel;
+      if (event.primaryColor) eventData.primaryColor = event.primaryColor;
+      if (event.secondaryColor) eventData.secondaryColor = event.secondaryColor;
+      if (event.organizationId) eventData.organizationId = event.organizationId;
+
+      console.log('📤 Sending to Supabase:', eventData);
+
       const { data, error } = await supabase
         .from('Event')
-        .insert({
-          name: event.name,
-          description: event.description,
-          date: event.date,
-          time: event.time,
-          venueName: event.venueName,
-          location: event.location,
-          imageUrl: event.imageUrl,
-          organizerLogoUrl: event.organizerLogoUrl,
-          venuePlanUrl: event.venuePlanUrl,
-          employeeNumberLabel: event.employeeNumberLabel,
-          successSoundId: event.successSoundId,
-          errorSoundId: event.errorSoundId,
-          vibrationEnabled: event.vibrationEnabled,
-          vibrationIntensity: event.vibrationIntensity,
-          primaryColor: event.primaryColor,
-          secondaryColor: event.secondaryColor,
-          organizationId: event.organizationId,
-          createdBy: event.createdBy || 'demo-user',
-        })
+        .insert(eventData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Supabase error details:', JSON.stringify(error, null, 2));
+        throw new Error(`Failed to save event: ${error.message || JSON.stringify(error)}`);
+      }
       
       console.log('✅ Event saved successfully to Supabase:', data);
       setEvents((prev) => [...prev, data as Event]);
       return data;
     } catch (error) {
-      console.error('❌ Failed to save event to Supabase:', error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('❌ Failed to save event to Supabase:', errorMessage);
+      throw new Error(errorMessage);
     }
   }, []);
 
