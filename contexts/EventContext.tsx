@@ -65,6 +65,7 @@ export const [EventProvider, useEvents] = createContextHook(() => {
           .upsert({
             id: currentUser.id,
             email: currentUser.email,
+            password: 'placeholder',
             fullName: currentUser.fullName,
             phone: currentUser.phone,
             role: currentUser.role,

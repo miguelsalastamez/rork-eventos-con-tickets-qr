@@ -126,6 +126,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
               .upsert({
                 id: demoUser.id,
                 email: demoUser.email,
+                password: 'placeholder',
                 fullName: demoUser.fullName,
                 phone: demoUser.phone,
                 role: demoUser.role,
@@ -160,6 +161,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
         .upsert({
           id: userData.id,
           email: userData.email,
+          password: 'placeholder',
           fullName: userData.fullName,
           phone: userData.phone,
           role: userData.role,
@@ -212,6 +214,7 @@ export const [UserProvider, useUser] = createContextHook(() => {
         .upsert({
           id: demoUser.id,
           email: demoUser.email,
+          password: 'placeholder',
           fullName: demoUser.fullName,
           phone: demoUser.phone,
           role: demoUser.role,
