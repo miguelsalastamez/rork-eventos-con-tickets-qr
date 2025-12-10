@@ -3,8 +3,10 @@ import createContextHook from '@nkzw/create-context-hook';
 import { Event, Attendee, Prize, RaffleWinner } from '@/types';
 import { sampleEvents } from '@/mocks/sampleEvents';
 import { supabase } from '@/lib/supabase';
+import { useUser } from './UserContext';
 
 export const [EventProvider, useEvents] = createContextHook(() => {
+  const { user, createDemoUser } = useUser();
   const [events, setEvents] = useState<Event[]>([]);
   const [attendees, setAttendees] = useState<Attendee[]>([]);
   const [prizes, setPrizes] = useState<Prize[]>([]);
@@ -44,6 +46,39 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     console.log('🎉 Creating event in Supabase:', event);
     
     try {
+      let currentUser = user;
+      if (!currentUser) {
+        console.log('⚠️ No user found, creating demo user...');
+        currentUser = await createDemoUser();
+      }
+
+      const { data: existingUser, error: userCheckError } = await supabase
+        .from('User')
+        .select('id')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (userCheckError || !existingUser) {
+        console.log('⚠️ User not found in Supabase, creating...');
+        const { error: userInsertError } = await supabase
+          .from('User')
+          .upsert({
+            id: currentUser.id,
+            email: currentUser.email,
+            fullName: currentUser.fullName,
+            phone: currentUser.phone,
+            role: currentUser.role,
+            organizationId: currentUser.organizationId,
+            createdAt: currentUser.createdAt,
+          });
+        
+        if (userInsertError) {
+          console.error('❌ Failed to create user in Supabase:', userInsertError);
+          throw new Error(`Failed to ensure user exists: ${userInsertError.message}`);
+        }
+        console.log('✅ User created in Supabase:', currentUser.id);
+      }
+
       const id = `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       
       const now = new Date().toISOString();
@@ -61,7 +96,7 @@ export const [EventProvider, useEvents] = createContextHook(() => {
         errorSoundId: event.errorSoundId,
         vibrationEnabled: event.vibrationEnabled,
         vibrationIntensity: event.vibrationIntensity,
-        createdBy: event.createdBy || 'demo-user',
+        createdBy: currentUser.id,
         createdAt: now,
         updatedAt: now,
       };
@@ -94,7 +129,7 @@ export const [EventProvider, useEvents] = createContextHook(() => {
       console.error('❌ Failed to save event to Supabase:', errorMessage);
       throw new Error(errorMessage);
     }
-  }, []);
+  }, [user, createDemoUser]);
 
   const getOrganizationEvents = useCallback((organizationId: string) => {
     return events.filter((e) => e.organizationId === organizationId);
