@@ -98,7 +98,6 @@ const server = Bun.serve({
   fetch: app.fetch,
 });
 
-console.log(`🚀 Server running on http://localhost:${port}`);
 console.log(`🔌 API endpoint: http://localhost:${port}/api`);
 console.log(`📡 tRPC endpoint: http://localhost:${port}/api/trpc`);
 
