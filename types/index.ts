@@ -102,19 +102,23 @@ export interface MessageHistory {
   sentAt: string;
 }
 
-export type NotificationType = 'invitation' | 'reminder-15d' | 'reminder-7d' | 'reminder-1d' | 'reminder-5h';
+export type NotificationType = 'invitation' | 'reminder-15d' | 'reminder-7d' | 'reminder-1d' | 'reminder-5h' | 'purchase_confirmation' | 'event_reminder' | 'check_in_confirmation';
 
 export interface AutomatedNotification {
   id: string;
   eventId: string;
   type: NotificationType;
-  enabled: boolean;
-  subject: string;
+  name: string;
+  enabled?: boolean;
+  isActive?: boolean;
+  subject?: string;
   content: string;
   channel: MessageChannel;
   scheduledFor?: string;
-  createdAt: string;
-  updatedAt: string;
+  trigger?: 'immediate' | 'before_event';
+  triggerHours?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type UserRole = 'super_admin' | 'seller_admin' | 'collaborator' | 'viewer';

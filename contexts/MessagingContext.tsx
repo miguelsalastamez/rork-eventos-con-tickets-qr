@@ -99,7 +99,7 @@ export const [MessagingProvider, useMessaging] = createContextHook(() => {
     return messageHistory.filter((h) => h.messageId === messageId);
   }, [messageHistory]);
 
-  const sendMessage = useCallback(async (messageId: string, recipients: Array<{ id: string; name: string; email: string; phone?: string }>) => {
+  const sendMessage = useCallback(async (messageId: string, recipients: { id: string; name: string; email: string; phone?: string }[]) => {
     const message = scheduledMessages.find((m) => m.id === messageId);
     if (!message) return { sentCount: 0, failedCount: 0 };
 
@@ -113,7 +113,8 @@ export const [MessagingProvider, useMessaging] = createContextHook(() => {
       recipientName: recipient.name,
       recipientEmail: recipient.email,
       recipientPhone: recipient.phone,
-      status: 'sent',
+      channel: message.channel,
+      status: 'sent' as const,
       sentAt: new Date().toISOString(),
     }));
 

@@ -29,7 +29,7 @@ export default function BuyTicketScreen() {
   const { getEventById } = useEvents();
 
   const event = getEventById(id);
-  const ticket = useMemo(() => tickets.find((t) => t.id === ticketId), [tickets, ticketId]) as any;
+  const ticket = useMemo(() => tickets.find((t) => t.id === ticketId), [tickets, ticketId]);
 
   const [quantity, setQuantity] = useState<string>(preselectedQuantity || '1');
   const [buyerFullName, setBuyerFullName] = useState('');

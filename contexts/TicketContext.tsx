@@ -64,10 +64,10 @@ export const [TicketProvider, useTickets] = createContextHook(() => {
   }, []);
 
   return useMemo(() => ({
-    tickets: [],
-    capacityPools: [],
-    purchases: [],
-    buyers: [],
+    tickets: [] as Ticket[],
+    capacityPools: [] as CapacityPool[],
+    purchases: [] as TicketPurchase[],
+    buyers: [] as BuyerAccount[],
     isLoading: false,
     addTicket,
     updateTicket,
