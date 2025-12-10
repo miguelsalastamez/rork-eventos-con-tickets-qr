@@ -9,7 +9,6 @@ import { SettingsProvider } from "@/contexts/SettingsContext";
 import { MessagingProvider } from "@/contexts/MessagingContext";
 import { UserProvider } from "@/contexts/UserContext";
 import { TicketProvider } from "@/contexts/TicketContext";
-import { trpc, trpcClient } from "@/lib/trpc";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -180,21 +179,19 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <trpc.Provider client={trpcClient} queryClient={queryClient}>
-          <UserProvider>
-            <SettingsProvider>
-              <EventProvider>
-                <TicketProvider>
-                  <MessagingProvider>
-                    <GestureHandlerRootView style={{ flex: 1 }}>
-                      <RootLayoutNav />
-                    </GestureHandlerRootView>
-                  </MessagingProvider>
-                </TicketProvider>
-              </EventProvider>
-            </SettingsProvider>
-          </UserProvider>
-        </trpc.Provider>
+        <UserProvider>
+          <SettingsProvider>
+            <EventProvider>
+              <TicketProvider>
+                <MessagingProvider>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <RootLayoutNav />
+                  </GestureHandlerRootView>
+                </MessagingProvider>
+              </TicketProvider>
+            </EventProvider>
+          </SettingsProvider>
+        </UserProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );

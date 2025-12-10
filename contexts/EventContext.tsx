@@ -1,14 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import createContextHook from '@nkzw/create-context-hook';
 import { Event, Attendee, Prize, RaffleWinner } from '@/types';
 import { sampleEvents } from '@/mocks/sampleEvents';
-import { trpc } from '@/lib/trpc';
-
-const EVENTS_STORAGE_KEY = '@eventpass_events';
-const ATTENDEES_STORAGE_KEY = '@eventpass_attendees';
-const PRIZES_STORAGE_KEY = '@eventpass_prizes';
-const RAFFLE_WINNERS_STORAGE_KEY = '@eventpass_raffle_winners';
+import { supabase } from '@/lib/supabase';
 
 export const [EventProvider, useEvents] = createContextHook(() => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -17,73 +11,74 @@ export const [EventProvider, useEvents] = createContextHook(() => {
   const [raffleWinners, setRaffleWinners] = useState<RaffleWinner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const createEventMutation = trpc.events.create.useMutation();
-  const eventsQuery = trpc.events.list.useQuery(undefined, {
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-
   useEffect(() => {
     loadData();
   }, []);
 
-  useEffect(() => {
-    if (eventsQuery.data) {
-      console.log('📚 Loaded events from database:', eventsQuery.data.length);
-      setEvents(eventsQuery.data as Event[]);
-    }
-  }, [eventsQuery.data]);
-
   const loadData = async () => {
     try {
-      const [storedAttendees, storedPrizes, storedWinners] = await Promise.all([
-        AsyncStorage.getItem(ATTENDEES_STORAGE_KEY),
-        AsyncStorage.getItem(PRIZES_STORAGE_KEY),
-        AsyncStorage.getItem(RAFFLE_WINNERS_STORAGE_KEY),
+      console.log('📚 Loading data from Supabase...');
+      
+      const [eventsRes, attendeesRes, prizesRes, winnersRes] = await Promise.all([
+        supabase.from('Event').select('*'),
+        supabase.from('Attendee').select('*'),
+        supabase.from('Prize').select('*'),
+        supabase.from('RaffleWinner').select('*'),
       ]);
 
-      if (storedAttendees) setAttendees(JSON.parse(storedAttendees));
-      if (storedPrizes) setPrizes(JSON.parse(storedPrizes));
-      if (storedWinners) setRaffleWinners(JSON.parse(storedWinners));
+      if (eventsRes.data) {
+        console.log('✅ Loaded', eventsRes.data.length, 'events from Supabase');
+        setEvents(eventsRes.data as Event[]);
+      }
+      if (attendeesRes.data) setAttendees(attendeesRes.data as Attendee[]);
+      if (prizesRes.data) setPrizes(prizesRes.data as Prize[]);
+      if (winnersRes.data) setRaffleWinners(winnersRes.data as RaffleWinner[]);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('❌ Error loading data from Supabase:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const addEvent = useCallback(async (event: Omit<Event, 'id' | 'createdAt'>) => {
-    console.log('🎉 Creating event in database:', event);
+    console.log('🎉 Creating event in Supabase:', event);
     
     try {
-      const result = await createEventMutation.mutateAsync({
-        name: event.name,
-        description: event.description,
-        date: event.date,
-        time: event.time,
-        venueName: event.venueName,
-        location: event.location,
-        imageUrl: event.imageUrl,
-        organizerLogoUrl: event.organizerLogoUrl,
-        venuePlanUrl: event.venuePlanUrl,
-        employeeNumberLabel: event.employeeNumberLabel,
-        successSoundId: event.successSoundId,
-        errorSoundId: event.errorSoundId,
-        vibrationEnabled: event.vibrationEnabled,
-        vibrationIntensity: event.vibrationIntensity,
-        primaryColor: event.primaryColor,
-        secondaryColor: event.secondaryColor,
-        organizationId: event.organizationId,
-      });
+      const { data, error } = await supabase
+        .from('Event')
+        .insert({
+          name: event.name,
+          description: event.description,
+          date: event.date,
+          time: event.time,
+          venueName: event.venueName,
+          location: event.location,
+          imageUrl: event.imageUrl,
+          organizerLogoUrl: event.organizerLogoUrl,
+          venuePlanUrl: event.venuePlanUrl,
+          employeeNumberLabel: event.employeeNumberLabel,
+          successSoundId: event.successSoundId,
+          errorSoundId: event.errorSoundId,
+          vibrationEnabled: event.vibrationEnabled,
+          vibrationIntensity: event.vibrationIntensity,
+          primaryColor: event.primaryColor,
+          secondaryColor: event.secondaryColor,
+          organizationId: event.organizationId,
+          createdBy: event.createdBy || 'demo-user',
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
       
-      console.log('✅ Event saved successfully to database:', result);
-      setEvents((prev) => [...prev, result as Event]);
-      return result;
+      console.log('✅ Event saved successfully to Supabase:', data);
+      setEvents((prev) => [...prev, data as Event]);
+      return data;
     } catch (error) {
-      console.error('❌ Failed to save event to database:', error);
+      console.error('❌ Failed to save event to Supabase:', error);
       throw error;
     }
-  }, [createEventMutation]);
+  }, []);
 
   const getOrganizationEvents = useCallback((organizationId: string) => {
     return events.filter((e) => e.organizationId === organizationId);
@@ -95,71 +90,136 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const updateEvent = useCallback(async (eventId: string, updates: Partial<Event>) => {
     console.log('🔄 Updating event:', eventId, updates);
-    const updatedEvents = events.map((e) =>
-      e.id === eventId ? { ...e, ...updates } : e
-    );
-    setEvents(updatedEvents);
-    await AsyncStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(updatedEvents));
-    console.log('✅ Event updated successfully');
-  }, [events]);
+    
+    try {
+      const { error } = await supabase
+        .from('Event')
+        .update(updates)
+        .eq('id', eventId);
+
+      if (error) throw error;
+
+      setEvents((prev) => prev.map((e) => (e.id === eventId ? { ...e, ...updates } : e)));
+      console.log('✅ Event updated successfully');
+    } catch (error) {
+      console.error('❌ Failed to update event:', error);
+      throw error;
+    }
+  }, []);
 
   const deleteEvent = useCallback(async (eventId: string) => {
-    const updatedEvents = events.filter((e) => e.id !== eventId);
-    const updatedAttendees = attendees.filter((a) => a.eventId !== eventId);
-    
-    setEvents(updatedEvents);
-    setAttendees(updatedAttendees);
-    
-    await Promise.all([
-      AsyncStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(updatedEvents)),
-      AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees)),
-    ]);
-  }, [events, attendees]);
+    try {
+      const { error } = await supabase.from('Event').delete().eq('id', eventId);
+      if (error) throw error;
+
+      setEvents((prev) => prev.filter((e) => e.id !== eventId));
+      setAttendees((prev) => prev.filter((a) => a.eventId !== eventId));
+    } catch (error) {
+      console.error('❌ Failed to delete event:', error);
+      throw error;
+    }
+  }, []);
 
   const addAttendee = useCallback(async (attendee: Attendee) => {
-    const updatedAttendees = [...attendees, attendee];
-    setAttendees(updatedAttendees);
-    await AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees));
-  }, [attendees]);
+    try {
+      const { data, error } = await supabase
+        .from('Attendee')
+        .insert(attendee)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setAttendees((prev) => [...prev, data as Attendee]);
+    } catch (error) {
+      console.error('❌ Failed to add attendee:', error);
+      throw error;
+    }
+  }, []);
 
   const addMultipleAttendees = useCallback(async (newAttendees: Attendee[]) => {
-    const updatedAttendees = [...attendees, ...newAttendees];
-    setAttendees(updatedAttendees);
-    await AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees));
-  }, [attendees]);
+    try {
+      const { data, error } = await supabase
+        .from('Attendee')
+        .insert(newAttendees)
+        .select();
+
+      if (error) throw error;
+
+      setAttendees((prev) => [...prev, ...(data as Attendee[])]);
+    } catch (error) {
+      console.error('❌ Failed to add multiple attendees:', error);
+      throw error;
+    }
+  }, []);
 
   const checkInAttendee = useCallback(async (attendeeId: string) => {
-    const updatedAttendees = attendees.map((a) =>
-      a.id === attendeeId ? { ...a, checkedIn: true, checkedInAt: new Date().toISOString() } : a
-    );
-    setAttendees(updatedAttendees);
-    await AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees));
-  }, [attendees]);
+    try {
+      const { error } = await supabase
+        .from('Attendee')
+        .update({ checkedIn: true, checkedInAt: new Date().toISOString() })
+        .eq('id', attendeeId);
+
+      if (error) throw error;
+
+      setAttendees((prev) =>
+        prev.map((a) =>
+          a.id === attendeeId ? { ...a, checkedIn: true, checkedInAt: new Date().toISOString() } : a
+        )
+      );
+    } catch (error) {
+      console.error('❌ Failed to check in attendee:', error);
+      throw error;
+    }
+  }, []);
 
   const toggleCheckInAttendee = useCallback(async (attendeeId: string) => {
-    const updatedAttendees = attendees.map((a) => {
-      if (a.id === attendeeId) {
-        if (a.checkedIn) {
-          return { ...a, checkedIn: false, checkedInAt: undefined };
-        } else {
-          return { ...a, checkedIn: true, checkedInAt: new Date().toISOString() };
-        }
-      }
-      return a;
-    });
-    setAttendees(updatedAttendees);
-    await AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees));
+    try {
+      const attendee = attendees.find((a) => a.id === attendeeId);
+      if (!attendee) return;
+
+      const updates = attendee.checkedIn
+        ? { checkedIn: false, checkedInAt: undefined }
+        : { checkedIn: true, checkedInAt: new Date().toISOString() };
+
+      const { error } = await supabase
+        .from('Attendee')
+        .update(updates)
+        .eq('id', attendeeId);
+
+      if (error) throw error;
+
+      setAttendees((prev) =>
+        prev.map((a) => (a.id === attendeeId ? { ...a, ...updates } : a))
+      );
+    } catch (error) {
+      console.error('❌ Failed to toggle check in:', error);
+      throw error;
+    }
   }, [attendees]);
 
   const checkInAllAttendees = useCallback(async (eventId: string) => {
-    const updatedAttendees = attendees.map((a) =>
-      a.eventId === eventId && !a.checkedIn
-        ? { ...a, checkedIn: true, checkedInAt: new Date().toISOString() }
-        : a
-    );
-    setAttendees(updatedAttendees);
-    await AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees));
-  }, [attendees]);
+    try {
+      const { error } = await supabase
+        .from('Attendee')
+        .update({ checkedIn: true, checkedInAt: new Date().toISOString() })
+        .eq('eventId', eventId)
+        .eq('checkedIn', false);
+
+      if (error) throw error;
+
+      setAttendees((prev) =>
+        prev.map((a) =>
+          a.eventId === eventId && !a.checkedIn
+            ? { ...a, checkedIn: true, checkedInAt: new Date().toISOString() }
+            : a
+        )
+      );
+    } catch (error) {
+      console.error('❌ Failed to check in all attendees:', error);
+      throw error;
+    }
+  }, []);
 
   const removeDuplicates = useCallback(async (eventId: string) => {
     const eventAttendees = attendees.filter((a) => a.eventId === eventId);
@@ -181,11 +241,25 @@ export const [EventProvider, useEvents] = createContextHook(() => {
       return acc;
     }, [] as Attendee[]);
 
-    const otherAttendees = attendees.filter((a) => a.eventId !== eventId);
-    const updatedAttendees = [...otherAttendees, ...uniqueAttendees];
-    
-    setAttendees(updatedAttendees);
-    await AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(updatedAttendees));
+    const duplicateIds = eventAttendees
+      .filter((a) => !uniqueAttendees.find((u) => u.id === a.id))
+      .map((a) => a.id);
+
+    if (duplicateIds.length > 0) {
+      try {
+        const { error } = await supabase
+          .from('Attendee')
+          .delete()
+          .in('id', duplicateIds);
+
+        if (error) throw error;
+
+        setAttendees((prev) => prev.filter((a) => !duplicateIds.includes(a.id)));
+      } catch (error) {
+        console.error('❌ Failed to remove duplicates:', error);
+        throw error;
+      }
+    }
     
     return eventAttendees.length - uniqueAttendees.length;
   }, [attendees]);
@@ -203,75 +277,148 @@ export const [EventProvider, useEvents] = createContextHook(() => {
   }, [events]);
 
   const addPrize = useCallback(async (prize: Prize) => {
-    const updatedPrizes = [...prizes, prize];
-    setPrizes(updatedPrizes);
-    await AsyncStorage.setItem(PRIZES_STORAGE_KEY, JSON.stringify(updatedPrizes));
-  }, [prizes]);
+    try {
+      const { data, error } = await supabase
+        .from('Prize')
+        .insert(prize)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPrizes((prev) => [...prev, data as Prize]);
+    } catch (error) {
+      console.error('❌ Failed to add prize:', error);
+      throw error;
+    }
+  }, []);
 
   const addMultiplePrizes = useCallback(async (newPrizes: Prize[]) => {
-    const updatedPrizes = [...prizes, ...newPrizes];
-    setPrizes(updatedPrizes);
-    await AsyncStorage.setItem(PRIZES_STORAGE_KEY, JSON.stringify(updatedPrizes));
-  }, [prizes]);
+    try {
+      const { data, error } = await supabase
+        .from('Prize')
+        .insert(newPrizes)
+        .select();
+
+      if (error) throw error;
+
+      setPrizes((prev) => [...prev, ...(data as Prize[])]);
+    } catch (error) {
+      console.error('❌ Failed to add multiple prizes:', error);
+      throw error;
+    }
+  }, []);
 
   const deletePrize = useCallback(async (prizeId: string) => {
-    const updatedPrizes = prizes.filter((p) => p.id !== prizeId);
-    setPrizes(updatedPrizes);
-    await AsyncStorage.setItem(PRIZES_STORAGE_KEY, JSON.stringify(updatedPrizes));
-  }, [prizes]);
+    try {
+      const { error } = await supabase.from('Prize').delete().eq('id', prizeId);
+      if (error) throw error;
+
+      setPrizes((prev) => prev.filter((p) => p.id !== prizeId));
+    } catch (error) {
+      console.error('❌ Failed to delete prize:', error);
+      throw error;
+    }
+  }, []);
 
   const getEventPrizes = useCallback((eventId: string) => {
     return prizes.filter((p) => p.eventId === eventId);
   }, [prizes]);
 
   const addRaffleWinner = useCallback(async (winner: RaffleWinner) => {
-    const updatedWinners = [...raffleWinners, winner];
-    setRaffleWinners(updatedWinners);
-    await AsyncStorage.setItem(RAFFLE_WINNERS_STORAGE_KEY, JSON.stringify(updatedWinners));
-  }, [raffleWinners]);
+    try {
+      const { data, error } = await supabase
+        .from('RaffleWinner')
+        .insert(winner)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setRaffleWinners((prev) => [...prev, data as RaffleWinner]);
+    } catch (error) {
+      console.error('❌ Failed to add raffle winner:', error);
+      throw error;
+    }
+  }, []);
 
   const addMultipleRaffleWinners = useCallback(async (newWinners: RaffleWinner[]) => {
-    const updatedWinners = [...raffleWinners, ...newWinners];
-    setRaffleWinners(updatedWinners);
-    await AsyncStorage.setItem(RAFFLE_WINNERS_STORAGE_KEY, JSON.stringify(updatedWinners));
-  }, [raffleWinners]);
+    try {
+      const { data, error } = await supabase
+        .from('RaffleWinner')
+        .insert(newWinners)
+        .select();
+
+      if (error) throw error;
+
+      setRaffleWinners((prev) => [...prev, ...(data as RaffleWinner[])]);
+    } catch (error) {
+      console.error('❌ Failed to add multiple raffle winners:', error);
+      throw error;
+    }
+  }, []);
 
   const getEventRaffleWinners = useCallback((eventId: string) => {
     return raffleWinners.filter((w) => w.eventId === eventId);
   }, [raffleWinners]);
 
   const deleteRaffleWinner = useCallback(async (winnerId: string) => {
-    const updatedWinners = raffleWinners.filter((w) => w.id !== winnerId);
-    setRaffleWinners(updatedWinners);
-    await AsyncStorage.setItem(RAFFLE_WINNERS_STORAGE_KEY, JSON.stringify(updatedWinners));
-  }, [raffleWinners]);
+    try {
+      const { error } = await supabase.from('RaffleWinner').delete().eq('id', winnerId);
+      if (error) throw error;
+
+      setRaffleWinners((prev) => prev.filter((w) => w.id !== winnerId));
+    } catch (error) {
+      console.error('❌ Failed to delete raffle winner:', error);
+      throw error;
+    }
+  }, []);
 
   const deleteAllRaffleWinners = useCallback(async (eventId: string) => {
-    const updatedWinners = raffleWinners.filter((w) => w.eventId !== eventId);
-    setRaffleWinners(updatedWinners);
-    await AsyncStorage.setItem(RAFFLE_WINNERS_STORAGE_KEY, JSON.stringify(updatedWinners));
-  }, [raffleWinners]);
+    try {
+      const { error } = await supabase.from('RaffleWinner').delete().eq('eventId', eventId);
+      if (error) throw error;
+
+      setRaffleWinners((prev) => prev.filter((w) => w.eventId !== eventId));
+    } catch (error) {
+      console.error('❌ Failed to delete all raffle winners:', error);
+      throw error;
+    }
+  }, []);
 
   const loadSampleData = useCallback(async () => {
     console.log('📦 Loading sample data...');
     try {
       const allAttendees: Attendee[] = [];
       
-      sampleEvents.forEach((event) => {
-        if (event.attendees) {
+      sampleEvents.forEach((event: any) => {
+        if (event.attendees && Array.isArray(event.attendees)) {
           allAttendees.push(...event.attendees);
         }
       });
 
-      const eventsWithoutAttendees = sampleEvents.map(({ attendees, ...event }) => event);
+      const eventsWithoutAttendees = sampleEvents.map((event) => {
+        const copy = { ...event } as any;
+        delete copy.attendees;
+        return copy;
+      });
 
-      setEvents(eventsWithoutAttendees);
-      setAttendees(allAttendees);
+      const { data: eventData, error: eventError } = await supabase
+        .from('Event')
+        .insert(eventsWithoutAttendees)
+        .select();
 
-      await Promise.all([
-        AsyncStorage.setItem(EVENTS_STORAGE_KEY, JSON.stringify(eventsWithoutAttendees)),
-        AsyncStorage.setItem(ATTENDEES_STORAGE_KEY, JSON.stringify(allAttendees)),
-      ]);
+      if (eventError) throw eventError;
+
+      const { data: attendeeData, error: attendeeError } = await supabase
+        .from('Attendee')
+        .insert(allAttendees)
+        .select();
+
+      if (attendeeError) throw attendeeError;
+
+      setEvents(eventData as Event[]);
+      setAttendees(attendeeData as Attendee[]);
 
       console.log('✅ Sample data loaded successfully');
     } catch (error) {

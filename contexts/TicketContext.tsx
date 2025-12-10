@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import { Ticket, CapacityPool, TicketPurchase, BuyerAccount } from '@/types';
-import { trpc } from '@/lib/trpc';
 
 export const [TicketProvider, useTickets] = createContextHook(() => {
   const addTicket = useCallback(async (ticket: Ticket) => {
