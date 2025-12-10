@@ -11,7 +11,6 @@ import {
   Platform,
 } from 'react-native';
 import { useLocalSearchParams, Stack, router } from 'expo-router';
-import { trpc } from '@/lib/trpc';
 import { Globe, Mail, Phone, Calendar, MapPin, Ticket } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -54,10 +53,9 @@ type Organization = {
 export default function StorePage() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
-  const { data: organization, isLoading, error } = trpc.organizations.getBySlug.useQuery(
-    { slug: slug || '' },
-    { enabled: !!slug }
-  );
+  const organization: Organization | undefined = undefined;
+  const isLoading = false;
+  const error = new Error('Backend not available');
 
   if (isLoading) {
     return (

@@ -52,7 +52,7 @@ export default function RaffleSpinScreen() {
   const [usedAttendeeIds, setUsedAttendeeIds] = useState<Set<string>>(new Set());
   const [intervalSeconds, setIntervalSeconds] = useState('3');
   const [isAutoRunning, setIsAutoRunning] = useState(false);
-  const autoRunTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoRunTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const scrollY = useRef(new Animated.Value(0)).current;
   const namesListRef = useRef<string[]>([]);

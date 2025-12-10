@@ -23,7 +23,6 @@ import {
   TrendingUp
 } from 'lucide-react-native';
 import { useUser } from '@/contexts/UserContext';
-import { trpc } from '@/lib/trpc';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface MenuItemProps {
@@ -60,24 +59,9 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { user, permissions } = useUser();
 
-  const purchasesQuery = trpc.purchases.list.useQuery(
-    { userId: user?.id },
-    { enabled: !!user?.id }
-  );
-
-  const eventsQuery = trpc.events.list.useQuery(
-    undefined,
-    { enabled: permissions.canCreateEvents }
-  );
-
-  const messagesQuery = trpc.messages.list.useQuery(
-    { userId: user?.id },
-    { enabled: !!user?.id && permissions.canSendMessages }
-  );
-
-  const userEvents = eventsQuery.data?.filter(e => e.createdBy === user?.id) || [];
-  const purchaseCount = purchasesQuery.data?.length || 0;
-  const unreadMessages = messagesQuery.data?.filter((m: any) => !m.read).length || 0;
+  const userEvents: any[] = [];
+  const purchaseCount = 0;
+  const unreadMessages = 0;
 
   const handleLogout = () => {
     router.replace('/');

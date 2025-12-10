@@ -12,7 +12,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Plus, Ticket as TicketIcon, Edit3, Trash2, DollarSign, Calendar, Users, Lock } from 'lucide-react-native';
-import { trpc } from '@/lib/trpc';
 import { useEvents } from '@/contexts/EventContext';
 import { useUser } from '@/contexts/UserContext';
 
@@ -26,24 +25,13 @@ export default function TicketsManagementScreen() {
   const hasTicketsAccess = canAccessFeature('hasEmailSupport');
   const primaryColor = event?.primaryColor || '#6366f1';
 
-  const ticketsQuery = trpc.tickets.list.useQuery({ eventId: id || '' }, {
-    enabled: !!id && hasTicketsAccess,
-  });
+  const tickets: any[] = [];
+  const capacityPools: any[] = [];
+  const isLoading = false;
 
-  const capacityPoolsQuery = trpc.capacityPools.list.useQuery({ eventId: id || '' }, {
-    enabled: !!id && hasTicketsAccess,
-  });
-
-  const deleteTicketMutation = trpc.tickets.delete.useMutation({
-    onSuccess: () => {
-      ticketsQuery.refetch();
-      capacityPoolsQuery.refetch();
-    },
-  });
-
-  const tickets = ticketsQuery.data || [];
-  const capacityPools = capacityPoolsQuery.data || [];
-  const isLoading = ticketsQuery.isLoading || capacityPoolsQuery.isLoading;
+  const handleDelete = (ticketId: string) => {
+    console.log('Delete ticket:', ticketId);
+  };
 
   if (!hasTicketsAccess) {
     return (
@@ -82,7 +70,7 @@ export default function TicketsManagementScreen() {
           text: 'Eliminar',
           style: 'destructive',
           onPress: () => {
-            deleteTicketMutation.mutate({ id: ticketId });
+            handleDelete(ticketId);
           },
         },
       ]

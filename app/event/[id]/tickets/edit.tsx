@@ -28,7 +28,7 @@ export default function EditTicketScreen() {
   const { getEventById } = useEvents();
 
   const event = getEventById(id);
-  const ticket = tickets.find((t) => t.id === ticketId);
+  const ticket = tickets.find((t) => t.id === ticketId) as any;
   const capacityPools = getEventCapacityPools(id);
 
   const [name, setName] = useState('');

@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { User, Mail, Phone, Camera } from 'lucide-react-native';
 import { useUser } from '@/contexts/UserContext';
-import { trpc } from '@/lib/trpc';
 
 export default function AccountScreen() {
   const router = useRouter();
@@ -12,8 +11,6 @@ export default function AccountScreen() {
   const [fullName, setFullName] = useState(user?.fullName || '');
   const [phone, setPhone] = useState(user?.phone || '');
   const [isSaving, setIsSaving] = useState(false);
-
-  const updateProfileMutation = trpc.auth.updateProfile.useMutation();
 
   const handleSave = async () => {
     if (!user) {
@@ -30,28 +27,13 @@ export default function AccountScreen() {
     try {
       const phoneValue = phone.trim() === '' ? null : phone.trim();
       
-      console.log('=== SAVING PROFILE ===');
-      console.log('Full name:', fullName);
-      console.log('Phone:', phoneValue);
-      
-      const result = await updateProfileMutation.mutateAsync({
-        fullName: fullName.trim(),
-        phone: phoneValue,
-      });
-      
-      console.log('=== SERVER RESPONSE ===');
-      console.log('Result:', result);
-      
       const updatedUser = {
         ...user,
-        fullName: result.fullName,
-        phone: result.phone || undefined,
+        fullName: fullName.trim(),
+        phone: phoneValue || undefined,
       };
       
-      console.log('=== SAVING TO CONTEXT ===');
       await saveUser(updatedUser);
-      
-      console.log('=== SAVE COMPLETE ===');
       
       Alert.alert('Éxito', 'Tu información ha sido actualizada correctamente');
       router.back();

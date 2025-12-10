@@ -217,11 +217,16 @@ export default function AttendeesListScreen() {
         URL.revokeObjectURL(url);
         Alert.alert('Éxito', 'Reporte descargado exitosamente');
       } else {
+        const docDir = (FileSystem as any).documentDirectory as string | undefined;
+        if (!docDir) {
+          Alert.alert('Error', 'La descarga de archivos no está disponible en esta plataforma');
+          return;
+        }
         const fileName = `reporte_${event.name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
-        const fileUri = FileSystem.documentDirectory + fileName;
+        const fileUri = docDir + fileName;
 
         await FileSystem.writeAsStringAsync(fileUri, wbout, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: 'base64' as any,
         });
 
         const canShare = await Sharing.isAvailableAsync();

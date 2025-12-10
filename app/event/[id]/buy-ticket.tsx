@@ -29,9 +29,9 @@ export default function BuyTicketScreen() {
   const { getEventById } = useEvents();
 
   const event = getEventById(id);
-  const ticket = useMemo(() => tickets.find((t) => t.id === ticketId), [tickets, ticketId]);
+  const ticket = useMemo(() => tickets.find((t) => t.id === ticketId), [tickets, ticketId]) as any;
 
-  const [quantity, setQuantity] = useState(preselectedQuantity || '1');
+  const [quantity, setQuantity] = useState<string>(preselectedQuantity || '1');
   const [buyerFullName, setBuyerFullName] = useState('');
   const [buyerEmail, setBuyerEmail] = useState('');
   const [buyerPhone, setBuyerPhone] = useState('');
@@ -283,7 +283,7 @@ export default function BuyTicketScreen() {
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Información Adicional</Text>
 
-                {ticket.formFields.map((field) => (
+                {ticket.formFields.map((field: any) => (
                   <View key={field.id} style={styles.inputGroup}>
                     <Text style={styles.label}>
                       {field.label} {field.required && '*'}

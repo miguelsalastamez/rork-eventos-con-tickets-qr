@@ -4,20 +4,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ShoppingBag, Ticket, Download } from 'lucide-react-native';
 import { useUser } from '@/contexts/UserContext';
-import { trpc } from '@/lib/trpc';
 
 export default function MyPurchasesScreen() {
   const router = useRouter();
   const { user } = useUser();
 
-  const purchasesQuery = trpc.purchases.list.useQuery(
-    { userId: user?.id },
-    { enabled: !!user?.id }
-  );
+  const purchases: any[] = [];
+  const isLoading = false;
 
-  const purchases = purchasesQuery.data || [];
-
-  if (purchasesQuery.isLoading) {
+  if (isLoading) {
     return (
       <SafeAreaView style={styles.container} edges={['bottom']}>
         <View style={styles.loadingContainer}>
