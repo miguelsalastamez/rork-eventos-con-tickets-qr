@@ -44,7 +44,10 @@ export const [EventProvider, useEvents] = createContextHook(() => {
     console.log('🎉 Creating event in Supabase:', event);
     
     try {
+      const id = `event-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      
       const eventData: any = {
+        id,
         name: event.name,
         description: event.description,
         date: event.date,
@@ -131,9 +134,14 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const addAttendee = useCallback(async (attendee: Attendee) => {
     try {
+      const attendeeData = {
+        ...attendee,
+        id: attendee.id || `attendee-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+
       const { data, error } = await supabase
         .from('Attendee')
-        .insert(attendee)
+        .insert(attendeeData)
         .select()
         .single();
 
@@ -148,9 +156,14 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const addMultipleAttendees = useCallback(async (newAttendees: Attendee[]) => {
     try {
+      const attendeesWithIds = newAttendees.map(a => ({
+        ...a,
+        id: a.id || `attendee-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }));
+
       const { data, error } = await supabase
         .from('Attendee')
-        .insert(newAttendees)
+        .insert(attendeesWithIds)
         .select();
 
       if (error) throw error;
@@ -287,9 +300,14 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const addPrize = useCallback(async (prize: Prize) => {
     try {
+      const prizeData = {
+        ...prize,
+        id: prize.id || `prize-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+
       const { data, error } = await supabase
         .from('Prize')
-        .insert(prize)
+        .insert(prizeData)
         .select()
         .single();
 
@@ -304,9 +322,14 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const addMultiplePrizes = useCallback(async (newPrizes: Prize[]) => {
     try {
+      const prizesWithIds = newPrizes.map(p => ({
+        ...p,
+        id: p.id || `prize-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }));
+
       const { data, error } = await supabase
         .from('Prize')
-        .insert(newPrizes)
+        .insert(prizesWithIds)
         .select();
 
       if (error) throw error;
@@ -336,9 +359,14 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const addRaffleWinner = useCallback(async (winner: RaffleWinner) => {
     try {
+      const winnerData = {
+        ...winner,
+        id: winner.id || `winner-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      };
+
       const { data, error } = await supabase
         .from('RaffleWinner')
-        .insert(winner)
+        .insert(winnerData)
         .select()
         .single();
 
@@ -353,9 +381,14 @@ export const [EventProvider, useEvents] = createContextHook(() => {
 
   const addMultipleRaffleWinners = useCallback(async (newWinners: RaffleWinner[]) => {
     try {
+      const winnersWithIds = newWinners.map(w => ({
+        ...w,
+        id: w.id || `winner-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      }));
+
       const { data, error } = await supabase
         .from('RaffleWinner')
-        .insert(newWinners)
+        .insert(winnersWithIds)
         .select();
 
       if (error) throw error;
